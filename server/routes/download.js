@@ -25,6 +25,53 @@ router.get('/catalog', async (req, res) => {
   }
 });
 
+// دریافت لیست دیتاست‌ها برای دانلود
+router.get('/datasets/list', async (req, res) => {
+  try {
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    const datasetsPath = path.join(__dirname, '../catalog/datasets.json');
+    const datasetsContent = await fs.readFile(datasetsPath, 'utf-8');
+    const datasets = JSON.parse(datasetsContent);
+    res.json({ datasets });
+  } catch (error) {
+    console.error('Error loading datasets:', error);
+    res.status(500).json({ error: error.message, datasets: [] });
+  }
+});
+
+// دریافت اطلاعات دیتاست برای دانلود
+router.get('/dataset/:datasetId', async (req, res) => {
+  try {
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    const datasetsPath = path.join(__dirname, '../catalog/datasets.json');
+    const datasetsContent = await fs.readFile(datasetsPath, 'utf-8');
+    const datasets = JSON.parse(datasetsContent);
+    
+    const dataset = datasets.find(d => d.id === req.params.datasetId);
+    
+    if (!dataset) {
+      return res.status(404).json({ 
+        success: false,
+        error: 'دیتاست یافت نشد' 
+      });
+    }
+
+    res.json({
+      success: true,
+      ...dataset,
+      viewUrl: dataset.downloadUrl || dataset.huggingfaceId ? `https://huggingface.co/datasets/${dataset.huggingfaceId}` : dataset.downloadUrl
+    });
+  } catch (error) {
+    console.error('Error loading dataset info:', error);
+    res.status(500).json({ 
+      success: false,
+      error: error.message 
+    });
+  }
+});
+
 // دریافت وضعیت دانلود
 router.get('/status/:jobId', async (req, res) => {
   try {

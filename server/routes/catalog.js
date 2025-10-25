@@ -4,31 +4,39 @@ import path from 'path';
 import fs from 'fs/promises';
 import { allAsync } from '../db.js';
 
-const router = express.Router();
-
-// دریافت مدل‌های موجود
+const router = express.Route// دریافت مدل‌های موجود
 router.get('/models', async (req, res) => {
     try {
+        const __filename = fileURLToPath(import.meta.url);
+        const __dirname = path.dirname(__filename);
+        const modelsPath = path.join(__dirname, '../catalog/models.json');
+        
+        // بارگذاری از فایل catalog
+        const modelsContent = await fs.readFile(modelsPath, 'utf-8');
+        const catalogModels = JSON.parse(modelsContent);
+
         // ابتدا از دیتابیس بخوان
         const dbModels = await allAsync(
             'SELECT * FROM assets WHERE kind = "model" AND status = "ready" ORDER BY updated_at DESC'
         );
 
-        if (dbModels.length > 0) {
-            const models = dbModels.map(asset => ({
-                id: asset.model_id,
-                name: asset.file_name,
-                type: asset.kind,
-                size: formatFileSize(asset.bytes_total || 0),
-                localPath: asset.local_path
-            }));
+        // ترکیب مدل‌های دیتابیس و کاتالوگ
+        const dbModelMap = dbModels.map(asset => ({
+            id: asset.model_id,
+            name: asset.file_name,
+            description: `${asset.file_name} - Downloaded`,
+            type: asset.kind,
+            size: formatFileSize(asset.bytes_total || 0),
+            localPath: asset.local_path,
+            status: 'downloaded',
+            source: 'local'
+        }));
 
-            return res.json(models);
-        }
+        // اضافه کردن مدل‌های کاتالوگ که در دیتابیس نیستند
+        const dbModelIds = new Set(dbModels.map(m => m.model_id));
+        const catalogOnlyModels = catalogModels.filter(cm => !dbModelIds.has(cm.id));
 
-        // اگر دیتابیس خالی است، از فایل پیش‌فرض استفاده کن
-        const defaultModels = await getDefaultModels();
-        res.json(defaultModels);
+        res.json([...dbModelMap, ...catalogOnlyModels]);
     } catch (error) {
         console.error('خطا در دریافت مدل‌ها:', error);
         // در صورت خطا، مدل‌های پیش‌فرض را برگردان
@@ -39,31 +47,42 @@ router.get('/models', async (req, res) => {
             res.status(500).json({ error: 'خطا در دریافت مدل‌ها' });
         }
     }
-});
-
-// دریافت دیتاست‌های موجود
+});دریافت مدل‌ها' });
+        }
+   // دریافت دیتاست‌های موجود
 router.get('/datasets', async (req, res) => {
     try {
+        const __filename = fileURLToPath(import.meta.url);
+        const __dirname = path.dirname(__filename);
+        const datasetsPath = path.join(__dirname, '../catalog/datasets.json');
+        
+        // بارگذاری از فایل catalog
+        const datasetsContent = await fs.readFile(datasetsPath, 'utf-8');
+        const catalogDatasets = JSON.parse(datasetsContent);
+
         // ابتدا از دیتابیس بخوان
         const dbDatasets = await allAsync(
             'SELECT * FROM assets WHERE kind = "dataset" AND status = "ready" ORDER BY updated_at DESC'
         );
 
-        if (dbDatasets.length > 0) {
-            const datasets = dbDatasets.map(asset => ({
-                id: asset.model_id,
-                name: asset.file_name,
-                samples: 'نامشخص',
-                size: formatFileSize(asset.bytes_total || 0),
-                localPath: asset.local_path
-            }));
+        // ترکیب دیتاست‌های دیتابیس و کاتالوگ
+        const dbDatasetMap = dbDatasets.map(asset => ({
+            id: asset.model_id,
+            name: asset.file_name,
+            description: asset.description || `${asset.file_name} - Downloaded`,
+            type: asset.kind,
+            size: formatFileSize(asset.bytes_total || 0),
+            samples: 'نامشخص',
+            localPath: asset.local_path,
+            status: 'downloaded',
+            source: 'local'
+        }));
 
-            return res.json(datasets);
-        }
+        // اضافه کردن دیتاست‌های کاتالوگ که در دیتابیس نیستند
+        const dbDatasetIds = new Set(dbDatasets.map(d => d.model_id));
+        const catalogOnlyDatasets = catalogDatasets.filter(cd => !dbDatasetIds.has(cd.id));
 
-        // اگر دیتابیس خالی است، از فایل پیش‌فرض استفاده کن
-        const defaultDatasets = await getDefaultDatasets();
-        res.json(defaultDatasets);
+        res.json([...dbDatasetMap, ...catalogOnlyDatasets]);
     } catch (error) {
         console.error('خطا در دریافت دیتاست‌ها:', error);
         // در صورت خطا، دیتاست‌های پیش‌فرض را برگردان
@@ -72,6 +91,9 @@ router.get('/datasets', async (req, res) => {
             res.json(defaultDatasets);
         } catch (fallbackError) {
             res.status(500).json({ error: 'خطا در دریافت دیتاست‌ها' });
+        }
+    }
+});دریافت دیتاست‌ها' });
         }
     }
 });

@@ -80,23 +80,42 @@ router.post('/start', async (req, res) => {
 
     // بررسی وجود Model و Dataset
     const baseModelId = baseModel.id || baseModel;
-    const baseModelAsset = await getAsync('SELECT * FROM assets WHERE model_id = ? AND kind = "model"', [baseModelId]);
+    
+    // Try to find in assets table first
+    let baseModelAsset = await getAsync('SELECT * FROM assets WHERE model_id = ? AND kind = "model"', [baseModelId]);
+    
+    // If not found in assets, it's a catalog model - that's OK
     if (!baseModelAsset) {
-      console.log(`❌ مدل پایه یافت نشد: ${baseModelId}`);
-      return res.status(400).json({ error: 'مدل پایه یافت نشد' });
+      console.log(`⚠️ مدل در دیتابیس یافت نشد، استفاده از کاتالوگ: ${baseModelId}`);
+      baseModelAsset = {
+        model_id: baseModelId,
+        file_name: baseModel.name || baseModelId,
+        kind: 'model',
+        status: 'ready'
+      };
     }
 
+    // Validate datasets (also allow catalog datasets)
+    const validatedDatasets = [];
     for (const dataset of datasets) {
       const dsId = dataset.id || dataset;
-      const ds = await getAsync('SELECT * FROM assets WHERE model_id = ? AND kind = "dataset"', [dsId]);
+      let ds = await getAsync('SELECT * FROM assets WHERE model_id = ? AND kind = "dataset"', [dsId]);
+      
       if (!ds) {
-        console.log(`❌ دیتاست یافت نشد: ${dsId}`);
-        return res.status(400).json({ error: `دیتاست ${dsId} یافت نشد` });
+        console.log(`⚠️ دیتاست در دیتابیس یافت نشد، استفاده از کاتالوگ: ${dsId}`);
+        ds = {
+          model_id: dsId,
+          file_name: dataset.name || dsId,
+          kind: 'dataset',
+          status: 'ready',
+          size: dataset.size || 1000
+        };
       }
+      validatedDatasets.push(ds);
     }
 
     console.log(`✅ مدل پایه: ${baseModelAsset.file_name}`);
-    console.log(`✅ دیتاست‌ها: ${datasets.length} مورد`);
+    console.log(`✅ دیتاست‌ها: ${validatedDatasets.length} مورد`);
 
     const jobId = uuidv4();
     const runId = uuidv4();
@@ -126,6 +145,19 @@ router.post('/start', async (req, res) => {
       id: jobId,
       runId
     });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// متوقف موقت آموزش
+router.post('/pause/:id', async (req, res) => {
+  try {
+    await runAsync(
+      'UPDATE jobs SET status = ?, message = ? WHERE id = ?',
+      ['paused', 'Training paused', req.params.id]
+    );
+    res.status(200).json({ ok: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

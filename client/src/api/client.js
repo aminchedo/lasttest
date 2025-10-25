@@ -321,6 +321,26 @@ class APIClient {
     }
   }
 
+  async pauseTraining(jobId) {
+    try {
+      const response = await this.axios.post(`/training/pause/${jobId}`);
+      return response;
+    } catch (error) {
+      console.error('Pause training error:', error);
+      throw error;
+    }
+  }
+
+  async resumeTraining(jobId) {
+    try {
+      const response = await this.axios.post(`/training/resume/${jobId}`);
+      return response;
+    } catch (error) {
+      console.error('Resume training error:', error);
+      throw error;
+    }
+  }
+
   async stopTraining(jobId) {
     try {
       const response = await this.axios.post(`/training/stop/${jobId}`);
@@ -337,6 +357,16 @@ class APIClient {
       return response;
     } catch (error) {
       console.error('Training status error:', error);
+      throw error;
+    }
+  }
+
+  async saveTrainedModel(jobId, modelName) {
+    try {
+      const response = await this.axios.post(`/training/save/${jobId}`, { modelName });
+      return response;
+    } catch (error) {
+      console.error('Save model error:', error);
       throw error;
     }
   }
