@@ -95,7 +95,7 @@ function Users() {
                 </div>
 
                 <div className="loading-container">
-                    <div className="loading-spinner"></div>
+                    <div className="unified-loading-spinner"></div>
                     <p className="loading-text">در حال بارگذاری کاربران...</p>
                 </div>
             </div>

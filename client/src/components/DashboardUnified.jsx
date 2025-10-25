@@ -147,7 +147,7 @@ const DashboardUnified = () => {
     return (
       <div className="dashboard-loading">
         <div className="loading-content">
-          <div className="loading-spinner" />
+          <div className="unified-loading-spinner" />
           <p>در حال بارگذاری داشبورد...</p>
         </div>
       </div>

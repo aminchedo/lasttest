@@ -109,12 +109,12 @@ function SystemMonitor() {
   };
 
   const MetricCard = ({ title, value, unit, color, icon: Icon, trend }) => (
-    <div className="metric-card">
+    <div className="unified-metric-card">
       <div className="metric-header">
         <div className="metric-icon" style={{ color }}>
           {Icon && <Icon size={16} />}
         </div>
-        <span className="metric-title">{title}</span>
+        <span className="unified-metric-card__title">{title}</span>
         {trend && (
           <span className={`metric-trend ${trend > 0 ? 'trend-up' : 'trend-down'}`}>
             {trend > 0 ? '↗' : '↘'}
@@ -150,7 +150,7 @@ function SystemMonitor() {
         <div className="system-monitor-content">
           <div className="system-metrics-grid">
             <div className="system-metric-large">
-              <div className="metric-title">CPU</div>
+              <div className="unified-metric-card__title">CPU</div>
               <CircularProgress 
                 percentage={systemStats.cpu.usage} 
                 color={getUsageColor(systemStats.cpu.usage)}
@@ -166,7 +166,7 @@ function SystemMonitor() {
             </div>
 
             <div className="system-metric-large">
-              <div className="metric-title">RAM</div>
+              <div className="unified-metric-card__title">RAM</div>
               <CircularProgress 
                 percentage={systemStats.memory.usage} 
                 color={getUsageColor(systemStats.memory.usage)}
@@ -179,7 +179,7 @@ function SystemMonitor() {
             </div>
 
             <div className="system-metric-large">
-              <div className="metric-title">GPU</div>
+              <div className="unified-metric-card__title">GPU</div>
               <CircularProgress 
                 percentage={systemStats.gpu.usage} 
                 color={getUsageColor(systemStats.gpu.usage)}

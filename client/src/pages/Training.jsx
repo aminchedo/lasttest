@@ -724,7 +724,7 @@ const Training = () => {
 
   const renderMetricsCards = () => (
     <div className="metrics-grid">
-      <div className="metric-card">
+      <div className="unified-metric-card">
         <div className="metric-icon" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
           <TrendingUp size={24} />
         </div>
@@ -734,7 +734,7 @@ const Training = () => {
         </div>
       </div>
 
-      <div className="metric-card">
+      <div className="unified-metric-card">
         <div className="metric-icon" style={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' }}>
           <Target size={24} />
         </div>
@@ -747,7 +747,7 @@ const Training = () => {
         </div>
       </div>
 
-      <div className="metric-card">
+      <div className="unified-metric-card">
         <div className="metric-icon" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' }}>
           <RefreshCw size={24} />
         </div>
@@ -758,7 +758,7 @@ const Training = () => {
         </div>
       </div>
 
-      <div className="metric-card">
+      <div className="unified-metric-card">
         <div className="metric-icon" style={{ background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)' }}>
           <Zap size={24} />
         </div>
@@ -770,7 +770,7 @@ const Training = () => {
       </div>
 
       {config.enableEarlyStopping && (
-        <div className="metric-card">
+        <div className="unified-metric-card">
           <div className="metric-icon" style={{ background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' }}>
             <AlertTriangle size={24} />
           </div>
@@ -784,7 +784,7 @@ const Training = () => {
       )}
 
       {metrics.gradientNorm > 0 && (
-        <div className="metric-card">
+        <div className="unified-metric-card">
           <div className="metric-icon" style={{ background: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)' }}>
             <Activity size={24} />
           </div>

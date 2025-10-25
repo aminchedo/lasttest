@@ -130,7 +130,7 @@ const Dashboard = () => {
     return (
       <div className="dashboard-loading">
         <div className="loading-content">
-          <div className="loading-spinner"></div>
+          <div className="unified-loading-spinner"></div>
           <p>در حال بارگذاری داشبورد...</p>
         </div>
       </div>

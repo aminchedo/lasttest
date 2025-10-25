@@ -131,9 +131,9 @@ const ModelsHub = () => {
       <div className="dashboard-section">
         <div className="metrics-dashboard">
           {metricsData.map((metric, index) => (
-            <div className="metric-card" key={index}>
-              <div className="metric-card-top">
-                <div className={`growth-indicator ${!metric.hasGrowth ? 'no-growth' : ''}`}>
+            <div className="unified-metric-card" key={index}>
+              <div className="unified-metric-card__top">
+                <div className={`unified-metric-card__growth ${!metric.hasGrowth ? 'unified-metric-card__growth--no-growth' : ''}`}>
                   {metric.hasGrowth ? (
                     <>
                       <span className="growth-value">{metric.growthValue}%+</span>
@@ -143,21 +143,21 @@ const ModelsHub = () => {
                     <span>0%</span>
                   )}
                 </div>
-                <div className={`icon-container ${metric.type}-icon`}>
+                <div className={`unified-metric-card__icon unified-metric-card__icon--${metric.type}`}>
                   {metric.icon}
                 </div>
               </div>
               
-              <div className="metric-card-value">
-                <span className="value-primary">{metric.value}</span>
+              <div className="unified-metric-card__value">
+                <span className="unified-metric-card__value-primary">{metric.value}</span>
                 {metric.valueSecondary && (
-                  <span className="value-secondary">{metric.valueSecondary}</span>
+                  <span className="unified-metric-card__value-secondary">{metric.valueSecondary}</span>
                 )}
               </div>
               
-              <div className="metric-card-content">
-                <h3 className="metric-title">{metric.title}</h3>
-                <p className="metric-subtitle">{metric.subtitle}</p>
+              <div className="unified-metric-card__content">
+                <h3 className="unified-metric-card__title">{metric.title}</h3>
+                <p className="unified-metric-card__subtitle">{metric.subtitle}</p>
               </div>
             </div>
           ))}
@@ -166,11 +166,11 @@ const ModelsHub = () => {
       
       {/* Enhanced Tab Navigation */}
       <div className="harmony-tab-container">
-        <div className="harmony-tab-navigation">
+        <div className="unified-tab-nav">
           {tabs.map(tab => (
             <button
               key={tab.id}
-              className={`harmony-tab-button ${activeTab === tab.id ? 'active' : ''}`}
+              className={`unified-tab-btn ${activeTab === tab.id ? 'unified-tab-btn--active' : ''}`}
               onClick={() => handleTabChange(tab.id)}
               role="tab"
               aria-selected={activeTab === tab.id}
@@ -190,9 +190,9 @@ const ModelsHub = () => {
         
         {/* Sub-tabs for Models (models/assets) */}
         {activeTab === 'models' && (
-          <div className="harmony-tab-navigation" style={{ marginTop: '16px' }}>
+          <div className="unified-tab-nav" style={{ marginTop: '16px' }}>
             <button
-              className={`harmony-tab-button ${activeSubTab === 'models' ? 'active' : ''}`}
+              className={`unified-tab-btn ${activeSubTab === 'models' ? 'unified-tab-btn--active' : ''}`}
               onClick={() => setActiveSubTab('models')}
               role="tab"
               aria-selected={activeSubTab === 'models'}
@@ -208,7 +208,7 @@ const ModelsHub = () => {
               )}
             </button>
             <button
-              className={`harmony-tab-button ${activeSubTab === 'assets' ? 'active' : ''}`}
+              className={`unified-tab-btn ${activeSubTab === 'assets' ? 'unified-tab-btn--active' : ''}`}
               onClick={() => setActiveSubTab('assets')}
               role="tab"
               aria-selected={activeSubTab === 'assets'}
@@ -230,7 +230,7 @@ const ModelsHub = () => {
         <AnimatePresence mode="wait">
           <motion.div 
             key={activeTab}
-            className="harmony-tab-content"
+            className="unified-tab-content"
             initial="hidden"
             animate="visible"
             exit="exit"

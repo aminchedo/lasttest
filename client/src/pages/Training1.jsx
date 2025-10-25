@@ -590,7 +590,7 @@ const Training = () => {
 
               {/* Metrics Grid */}
               <div className="metrics-grid">
-                <div className="metric-card">
+                <div className="unified-metric-card">
                   <div className="metric-icon">
                     <TrendingUp size={16} className="text-red-500" />
                   </div>
@@ -602,7 +602,7 @@ const Training = () => {
                   </div>
                 </div>
 
-                <div className="metric-card">
+                <div className="unified-metric-card">
                   <div className="metric-icon">
                     <Target size={16} className="text-green-500" />
                   </div>
@@ -614,7 +614,7 @@ const Training = () => {
                   </div>
                 </div>
 
-                <div className="metric-card">
+                <div className="unified-metric-card">
                   <div className="metric-icon">
                     <RefreshCw size={16} className="text-blue-500" />
                   </div>
@@ -626,7 +626,7 @@ const Training = () => {
                   </div>
                 </div>
 
-                <div className="metric-card">
+                <div className="unified-metric-card">
                   <div className="metric-icon">
                     <Zap size={16} className="text-yellow-500" />
                   </div>

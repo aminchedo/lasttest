@@ -314,7 +314,7 @@ function Settings({ onUpdate, onToast }) {
     return (
       <div className="settings-page animate-fadeInUp">
         <div className="loading-container">
-          <div className="loading-spinner"></div>
+          <div className="unified-loading-spinner"></div>
           <p className="loading-text">در حال بارگذاری تنظیمات...</p>
         </div>
       </div>
