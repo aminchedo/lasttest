@@ -41,6 +41,23 @@ import apiClient from '../api/endpoints';
 import { toast } from 'react-hot-toast';
 import { clamp, text, num } from '../utils/sanitize';
 
+// Mini progress bar component for download progress
+function MiniProgressBar({ value }) {
+  const pct = Math.min(Math.max(value ?? 0, 0), 100);
+  return (
+    <div className="w-full h-[2px] bg-slate-200 rounded-full overflow-hidden">
+      <div
+        className="h-full rounded-full bg-gradient-to-l from-fuchsia-500 to-violet-500 transition-[width] duration-200 ease-linear"
+        style={{ width: pct + '%' }}
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={pct}
+      />
+    </div>
+  );
+}
+
 function Models({ activeSubTab = 'models', setActiveSubTab = () => {} }) {
   // ===================================
   // STATE MANAGEMENT
@@ -908,15 +925,8 @@ function Models({ activeSubTab = 'models', setActiveSubTab = () => {} }) {
 
                   {/* Download Progress Bar */}
                   {model.status === 'downloading' && (
-                    <div className="model-progress-bar">
-                      <div className="progress-track">
-                        <motion.div
-                          className="progress-indicator"
-                          initial={{ width: 0 }}
-                          animate={{ width: `${clamp(downloadProgress[model.id] ?? 0, 0, 100)}%` }}
-                          transition={{ duration: 0.5 }}
-                        />
-                      </div>
+                    <div className="w-full mt-2">
+                      <MiniProgressBar value={downloadProgress[model.id] ?? 0} />
                     </div>
                   )}
                 </motion.div>
