@@ -1,0 +1,142 @@
+/* Layout Fix - Resolve CSS conflicts and restore proper layout */
+
+/* Reset and fix main app layout */
+.app {
+    display: flex !important;
+    min-height: 100vh !important;
+    position: relative !important;
+    direction: rtl !important;
+    background: #f8fafc !important;
+}
+
+/* Fix main wrapper positioning */
+.main-wrapper {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    margin-right: 280px !important;
+    /* Sidebar width */
+    transition: margin-right 0.3s ease !important;
+    min-height: 100vh !important;
+    overflow: hidden !important;
+}
+
+/* Fix sidebar positioning */
+.app-sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    width: 280px !important;
+    height: 100vh !important;
+    background: white !important;
+    border-left: 1px solid #e2e8f0 !important;
+    z-index: 1000 !important;
+    overflow-y: auto !important;
+    transition: width 0.3s ease !important;
+}
+
+/* Collapsed sidebar state */
+.app.sidebar-collapsed .main-wrapper {
+    margin-right: 80px !important;
+}
+
+.app.sidebar-collapsed .app-sidebar {
+    width: 80px !important;
+}
+
+/* Fix header navigation */
+.app-header-nav {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 1rem 2rem !important;
+    background: white !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    min-height: 70px !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 100 !important;
+}
+
+/* Fix main content area */
+.main-content {
+    flex: 1 !important;
+    padding: 2rem !important;
+    overflow-y: auto !important;
+    background: #f8fafc !important;
+    min-height: calc(100vh - 140px) !important;
+}
+
+/* Fix footer positioning */
+.footer {
+    background: white !important;
+    border-top: 1px solid #e2e8f0 !important;
+    padding: 1rem 2rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    margin-top: auto !important;
+}
+
+/* Mobile responsive fixes */
+@media (max-width: 768px) {
+    .app-sidebar {
+        transform: translateX(100%) !important;
+        width: 280px !important;
+    }
+
+    .app-sidebar.mobile-open {
+        transform: translateX(0) !important;
+    }
+
+    .main-wrapper {
+        margin-right: 0 !important;
+    }
+
+    .app-header-nav {
+        flex-direction: column !important;
+        gap: 1rem !important;
+        padding: 1rem !important;
+    }
+
+    .main-content {
+        padding: 1rem !important;
+    }
+}
+
+/* Ensure proper z-index stacking */
+.app-sidebar {
+    z-index: 1000 !important;
+}
+
+.app-header-nav {
+    z-index: 100 !important;
+}
+
+.main-content {
+    z-index: 1 !important;
+}
+
+/* Fix any floating elements */
+.toast-container {
+    position: fixed !important;
+    top: 20px !important;
+    left: 20px !important;
+    z-index: 9999 !important;
+}
+
+/* Remove any conflicting transforms */
+.app * {
+    transform: none !important;
+}
+
+/* Fix flexbox issues */
+.app {
+    display: flex !important;
+    flex-direction: row !important;
+}
+
+.main-wrapper {
+    display: flex !important;
+    flex-direction: column !important;
+}
