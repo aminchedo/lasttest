@@ -1,0 +1,183 @@
+{
+  "settings": [],
+  "assets": [
+    {
+      "id": "mh439jnksjxq9w9wvb8",
+      "model_id": "gpt2-persian",
+      "kind": "model",
+      "file_name": "GPT-2 Persian",
+      "source_url": "https://huggingface.co/HooshvareLab/gpt2-fa/resolve/main/pytorch_model.bin",
+      "status": "ready",
+      "bytes_total": 1200000000,
+      "local_path": "/models/gpt2-persian",
+      "created_at": "2025-10-24T00:04:18.752Z",
+      "updated_at": "2025-10-24T00:04:18.752Z"
+    },
+    {
+      "id": "mh439jnk9jqfgxlz3gd",
+      "model_id": "bert-fa",
+      "kind": "model",
+      "file_name": "BERT Persian",
+      "source_url": "https://huggingface.co/HooshvareLab/bert-fa-base-uncased/resolve/main/pytorch_model.bin",
+      "status": "ready",
+      "bytes_total": 420000000,
+      "local_path": "/models/bert-fa",
+      "created_at": "2025-10-24T00:04:18.752Z",
+      "updated_at": "2025-10-24T00:04:18.752Z"
+    },
+    {
+      "id": "mh439jnko9zukmf6n8",
+      "model_id": "roberta-fa",
+      "kind": "model",
+      "file_name": "RoBERTa Persian",
+      "source_url": "https://huggingface.co/HooshvareLab/roberta-fa-base-uncased/resolve/main/pytorch_model.bin",
+      "status": "ready",
+      "bytes_total": 480000000,
+      "local_path": "/models/roberta-fa",
+      "created_at": "2025-10-24T00:04:18.752Z",
+      "updated_at": "2025-10-24T00:04:18.752Z"
+    },
+    {
+      "id": "mh439jnkr4rret5li5f",
+      "model_id": "t5-fa",
+      "kind": "model",
+      "file_name": "T5 Persian",
+      "source_url": "https://huggingface.co/HooshvareLab/t5-fa-base/resolve/main/pytorch_model.bin",
+      "status": "ready",
+      "bytes_total": 900000000,
+      "local_path": "/models/t5-fa",
+      "created_at": "2025-10-24T00:04:18.752Z",
+      "updated_at": "2025-10-24T00:04:18.752Z"
+    },
+    {
+      "id": "mh439jnkuc0arl61il",
+      "model_id": "fartail",
+      "kind": "dataset",
+      "file_name": "FarsTail Dataset",
+      "description": "مجموعه داده استنتاج زبان طبیعی فارسی با ۱۰,۳۶۷ نمونه",
+      "source_url": "https://huggingface.co/datasets/HooshvareLab/fartail/resolve/main/train.json",
+      "status": "ready",
+      "bytes_total": 25000000,
+      "local_path": "/datasets/fartail",
+      "created_at": "2025-10-24T00:04:18.752Z",
+      "updated_at": "2025-10-24T00:04:18.752Z"
+    },
+    {
+      "id": "mh439jnks20dbnnz1yo",
+      "model_id": "persian-news",
+      "kind": "dataset",
+      "file_name": "Persian News Dataset",
+      "description": "مجموعه داده اخبار فارسی برای آموزش مدل‌های زبانی",
+      "source_url": "https://huggingface.co/datasets/HooshvareLab/persian-news/resolve/main/train.json",
+      "status": "ready",
+      "bytes_total": 150000000,
+      "local_path": "/datasets/persian-news",
+      "created_at": "2025-10-24T00:04:18.752Z",
+      "updated_at": "2025-10-24T00:04:18.752Z"
+    },
+    {
+      "id": "mh439jnkcvd76b7veq",
+      "model_id": "persian-sentiment",
+      "kind": "dataset",
+      "file_name": "Persian Sentiment Dataset",
+      "description": "مجموعه داده تحلیل احساسات فارسی",
+      "source_url": "https://huggingface.co/datasets/HooshvareLab/persian-sentiment/resolve/main/train.json",
+      "status": "ready",
+      "bytes_total": 50000000,
+      "local_path": "/datasets/persian-sentiment",
+      "created_at": "2025-10-24T00:04:18.752Z",
+      "updated_at": "2025-10-24T00:04:18.752Z"
+    },
+    {
+      "id": "mh439jnkawieiaz8sn",
+      "model_id": "persian-qa",
+      "kind": "dataset",
+      "file_name": "Persian Question Answering",
+      "description": "مجموعه داده پرسش و پاسخ فارسی",
+      "source_url": "https://huggingface.co/datasets/HooshvareLab/persian-qa/resolve/main/train.json",
+      "status": "ready",
+      "bytes_total": 80000000,
+      "local_path": "/datasets/persian-qa",
+      "created_at": "2025-10-24T00:04:18.752Z",
+      "updated_at": "2025-10-24T00:04:18.752Z"
+    },
+    {
+      "id": "mh439jnk3q31ls0oqfw",
+      "model_id": "persian-text-classification",
+      "kind": "dataset",
+      "file_name": "Persian Text Classification",
+      "description": "مجموعه داده طبقه‌بندی متن فارسی",
+      "source_url": "https://huggingface.co/datasets/HooshvareLab/persian-text-classification/resolve/main/train.json",
+      "status": "ready",
+      "bytes_total": 120000000,
+      "local_path": "/datasets/persian-text-classification",
+      "created_at": "2025-10-24T00:04:18.752Z",
+      "updated_at": "2025-10-24T00:04:18.752Z"
+    },
+    {
+      "id": "mh439jnkrxa8d6gz67b",
+      "model_id": "persian-named-entity",
+      "kind": "dataset",
+      "file_name": "Persian Named Entity Recognition",
+      "description": "مجموعه داده شناسایی موجودیت‌های نام‌دار فارسی",
+      "source_url": "https://huggingface.co/datasets/HooshvareLab/persian-ner/resolve/main/train.json",
+      "status": "ready",
+      "bytes_total": 60000000,
+      "local_path": "/datasets/persian-ner",
+      "created_at": "2025-10-24T00:04:18.752Z",
+      "updated_at": "2025-10-24T00:04:18.752Z"
+    }
+  ],
+  "models": [],
+  "tts_models": [],
+  "datasets": [],
+  "jobs": [
+    {
+      "id": "a2e8df12-be37-46fd-b6f6-00167987a23d",
+      "kind": "training",
+      "status": "running",
+      "message": "Training started...",
+      "progress": "0",
+      "started_at": "CURRENT_TIMESTAMP",
+      "created_at": "2025-10-24T00:04:51.876Z",
+      "updated_at": "2025-10-24T00:04:51.876Z"
+    },
+    {
+      "id": "c434008d-ea18-4391-92fe-8347e5834e87",
+      "kind": "training",
+      "status": "running",
+      "message": "Training started...",
+      "progress": "0",
+      "started_at": "CURRENT_TIMESTAMP",
+      "created_at": "2025-10-24T00:05:15.211Z",
+      "updated_at": "2025-10-24T00:05:15.211Z"
+    }
+  ],
+  "runs": [
+    {
+      "id": "49c806c6-22dc-4dff-bd36-be4d18f0d3b4",
+      "job_id": "a2e8df12-be37-46fd-b6f6-00167987a23d",
+      "status": "queued",
+      "base_model": "gpt2-persian",
+      "datasets": "[\"mh439jnksjxq9w9wvb8\"]",
+      "teacher_model": null,
+      "started_at": "CURRENT_TIMESTAMP",
+      "updated_at": "2025-10-24T00:04:51.898Z",
+      "created_at": "2025-10-24T00:04:51.898Z"
+    },
+    {
+      "id": "ffd155c9-375a-4a56-b6fd-99755410e299",
+      "job_id": "c434008d-ea18-4391-92fe-8347e5834e87",
+      "status": "queued",
+      "base_model": "gpt2-persian",
+      "datasets": "[\"sentiment-fa\"]",
+      "teacher_model": null,
+      "started_at": "CURRENT_TIMESTAMP",
+      "updated_at": "2025-10-24T00:05:15.303Z",
+      "created_at": "2025-10-24T00:05:15.303Z"
+    }
+  ],
+  "download_queue": [],
+  "cached_models": [],
+  "api_requests": []
+}
