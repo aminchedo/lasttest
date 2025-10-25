@@ -1,0 +1,23 @@
+{
+    "watch": [
+        "server/**/*.js",
+        "server/**/*.mjs",
+        "server/**/*.cjs"
+    ],
+    "ext": "js,mjs,cjs",
+    "ignore": [
+        "server/data/**",
+        "server/exports/**",
+        "server/datasets/**",
+        "server/logs/**",
+        "server/tmp/**",
+        "client/**",
+        "node_modules/**",
+        ".git/**"
+    ],
+    "delay": "200ms",
+    "env": {
+        "PORT": "3001",
+        "NODE_ENV": "development"
+    }
+}
