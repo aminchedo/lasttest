@@ -1,0 +1,8 @@
+/* Global CSS Entry Point - Proper Import Order */
+/* Order: variables/base → layout → components → animations → glass → RTL */
+
+@import './main.css';
+@import './ui-kit.css';
+@import './animations.css';
+@import './glassmorphism.css';
+@import './rtl.css';

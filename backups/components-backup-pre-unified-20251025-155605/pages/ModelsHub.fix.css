@@ -1,0 +1,27 @@
+/* Ensure the hub itself can expand fully */
+.models-hub { width: 100%; max-width: none; }
+
+.models-hub .cards-grid,
+.models-hub .models-grid,
+.models-hub .datasets-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0,1fr));
+  grid-auto-flow: row dense;
+  gap: 16px;
+}
+
+.models-hub .cards-grid > *,
+.models-hub .models-grid > *,
+.models-hub .datasets-grid > * { grid-column: span 12; }
+
+@media (min-width: 1024px) {
+  .models-hub .cards-grid > *,
+  .models-hub .models-grid > *,
+  .models-hub .datasets-grid > * { grid-column: span 4; }
+}
+
+@media (min-width: 1280px) {
+  .models-hub .cards-grid > *,
+  .models-hub .models-grid > *,
+  .models-hub .datasets-grid > * { grid-column: span 3; }
+}

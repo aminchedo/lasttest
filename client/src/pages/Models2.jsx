@@ -612,89 +612,89 @@ function Models() {
           <div className="models-header-modern">
             <div className="models-stats-container">
               <div className="metrics-dashboard">
-                <div className="metric-card">
-                  <div className="metric-card-top">
-                    <div className="growth-indicator">
+                <div className="unified-metric-card">
+                  <div className="unified-metric-card__top">
+                    <div className="unified-metric-card__growth">
                       <span className="growth-value">0%</span>
                     </div>
-                    <div className="icon-container model-icon">
+                    <div className="unified-metric-card__icon model-icon">
                       <Package size={24} />
                     </div>
                   </div>
 
-                  <div className="metric-card-value">
-                    <span className="value-primary">{stats.total}</span>
+                  <div className="unified-metric-card__value">
+                    <span className="unified-metric-card__value-primary">{stats.total}</span>
                   </div>
 
-                  <div className="metric-card-content">
-                    <h3 className="metric-title">کل مدل‌ها</h3>
-                    <p className="metric-subtitle">تعداد کل مدل‌های موجود</p>
+                  <div className="unified-metric-card__content">
+                    <h3 className="unified-metric-card__title">کل مدل‌ها</h3>
+                    <p className="unified-metric-card__subtitle">تعداد کل مدل‌های موجود</p>
                   </div>
                 </div>
 
-                <div className="metric-card">
-                  <div className="metric-card-top">
-                    <div className="growth-indicator">
+                <div className="unified-metric-card">
+                  <div className="unified-metric-card__top">
+                    <div className="unified-metric-card__growth">
                       <span className="growth-value">8%+</span>
                       <svg className="growth-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     </div>
-                    <div className="icon-container success-icon">
+                    <div className="unified-metric-card__icon success-icon">
                       <CheckCircle size={24} />
                     </div>
                   </div>
 
-                  <div className="metric-card-value">
-                    <span className="value-primary">{stats.ready}</span>
+                  <div className="unified-metric-card__value">
+                    <span className="unified-metric-card__value-primary">{stats.ready}</span>
                   </div>
 
-                  <div className="metric-card-content">
-                    <h3 className="metric-title">آماده استفاده</h3>
-                    <p className="metric-subtitle">مدل‌های آماده برای استفاده</p>
+                  <div className="unified-metric-card__content">
+                    <h3 className="unified-metric-card__title">آماده استفاده</h3>
+                    <p className="unified-metric-card__subtitle">مدل‌های آماده برای استفاده</p>
                   </div>
                 </div>
 
-                <div className="metric-card">
-                  <div className="metric-card-top">
-                    <div className="growth-indicator">
+                <div className="unified-metric-card">
+                  <div className="unified-metric-card__top">
+                    <div className="unified-metric-card__growth">
                       <span className="growth-value">5%+</span>
                       <svg className="growth-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     </div>
-                    <div className="icon-container processing-icon">
+                    <div className="unified-metric-card__icon processing-icon">
                       <Download size={24} />
                     </div>
                   </div>
 
-                  <div className="metric-card-value">
-                    <span className="value-primary">{stats.downloading}</span>
+                  <div className="unified-metric-card__value">
+                    <span className="unified-metric-card__value-primary">{stats.downloading}</span>
                   </div>
 
-                  <div className="metric-card-content">
-                    <h3 className="metric-title">در حال دانلود</h3>
-                    <p className="metric-subtitle">مدل‌های در حال دانلود</p>
+                  <div className="unified-metric-card__content">
+                    <h3 className="unified-metric-card__title">در حال دانلود</h3>
+                    <p className="unified-metric-card__subtitle">مدل‌های در حال دانلود</p>
                   </div>
                 </div>
 
-                <div className="metric-card">
-                  <div className="metric-card-top">
-                    <div className="growth-indicator no-growth">
+                <div className="unified-metric-card">
+                  <div className="unified-metric-card__top">
+                    <div className="unified-metric-card__growth unified-metric-card__growth--no-growth">
                       <span>0%</span>
                     </div>
-                    <div className="icon-container error-icon">
+                    <div className="unified-metric-card__icon error-icon">
                       <AlertCircle size={24} />
                     </div>
                   </div>
 
-                  <div className="metric-card-value">
-                    <span className="value-primary">{stats.error}</span>
+                  <div className="unified-metric-card__value">
+                    <span className="unified-metric-card__value-primary">{stats.error}</span>
                   </div>
 
-                  <div className="metric-card-content">
-                    <h3 className="metric-title">خطا</h3>
-                    <p className="metric-subtitle">مدل‌های با خطا</p>
+                  <div className="unified-metric-card__content">
+                    <h3 className="unified-metric-card__title">خطا</h3>
+                    <p className="unified-metric-card__subtitle">مدل‌های با خطا</p>
                   </div>
                 </div>
               </div>
@@ -803,18 +803,18 @@ function Models() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ delay: index * 0.05 }}
-                  className={`model-card-modern ${model.type}-card ${selectedModels.includes(model.id) ? 'selected' : ''} ${model.status === 'downloading' ? 'downloading' : ''}`}
+                  className={`unified-model-card ${model.type}-card ${selectedModels.includes(model.id) ? 'selected' : ''} ${model.status === 'downloading' ? 'downloading' : ''}`}
                 >
-                  <div className="model-card-header">
-                    <div className={`model-icon-modern ${model.type}-icon`}>
+                  <div className="unified-model-card__header">
+                    <div className={`unified-model-card__icon ${model.type}-icon`}>
                       {model.type === 'text' && <FileText size={20} />}
                       {model.type === 'vision' && <Eye size={20} />}
                       {model.type === 'audio' && <Volume2 size={20} />}
                       {model.type === 'other' && <Brain size={20} />}
                     </div>
-                    <div className="model-info-modern">
-                      <h3 className="model-name-modern">{model.name}</h3>
-                      <p className="model-description-modern">{model.description}</p>
+                    <div className="unified-model-card__info">
+                      <h3 className="unified-model-card__name">{model.name}</h3>
+                      <p className="unified-model-card__description">{model.description}</p>
                       <div className="model-meta">
                         {model.isHuggingFace && (
                           <div className="hf-badge">
@@ -829,7 +829,7 @@ function Models() {
                         )}
                       </div>
                     </div>
-                    <div className="model-actions-modern">
+                    <div className="unified-model-card__actions">
                       {model.status === 'available' && (
                         <motion.button
                           whileHover={{ scale: 1.1 }}
@@ -853,8 +853,8 @@ function Models() {
                     </div>
                   </div>
 
-                  <div className="model-card-details">
-                    <div className="model-meta-modern">
+                  <div className="unified-model-card__details">
+                    <div className="unified-model-card__meta">
                       <span className={`model-type-badge type-${model.type}`}>
                         {model.type === 'text' && 'متنی'}
                         {model.type === 'vision' && 'بینایی'}

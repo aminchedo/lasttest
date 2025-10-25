@@ -9,6 +9,7 @@ import './styles/glassmorphism.css'
 import './styles/main.css'
 import './index.css'
 import './styles/ui-kit.css'
+import './styles/unified-styles.css'
 
 // تنظیم RTL و زبان فارسی
 document.documentElement.setAttribute('dir', 'rtl');

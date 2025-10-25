@@ -1,0 +1,353 @@
+/* Scoped layout for Models Hub — matches real class names used in ModelsHub.jsx */
+
+/* Container must expand and avoid flex clipping */
+.models-hub-container,
+.models-hub {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 16px;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+/* If any parent flex squeezes content, this prevents zero-width */
+.app .main-wrapper,
+.app .main-content { min-width: 0; }
+
+/* Top stats / sections */
+.models-hub-container .dashboard-section,
+.models-hub .dashboard-section,
+.models-hub-container .metrics-dashboard,
+.models-hub .metrics-dashboard {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-auto-flow: row dense;
+  gap: 16px;
+  margin: 8px 0 20px;
+}
+
+/* Cards */
+.models-hub-container .metric-card,
+.models-hub .metric-card,
+.models-hub-container .metric-card-modern,
+.models-hub .metric-card-modern {
+  grid-column: span 12;
+  width: 100%;
+  box-sizing: border-box;
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding: 20px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.models-hub-container .metric-card:hover,
+.models-hub .metric-card:hover,
+.models-hub-container .metric-card-modern:hover,
+.models-hub .metric-card-modern:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border-color: #3b82f6;
+}
+
+@media (min-width: 768px) {
+  .models-hub-container .metric-card,
+  .models-hub .metric-card,
+  .models-hub-container .metric-card-modern,
+  .models-hub .metric-card-modern { grid-column: span 6; }
+}
+@media (min-width: 1024px) {
+  .models-hub-container .metric-card,
+  .models-hub .metric-card,
+  .models-hub-container .metric-card-modern,
+  .models-hub .metric-card-modern { grid-column: span 4; }
+}
+@media (min-width: 1280px) {
+  .models-hub-container .metric-card,
+  .models-hub .metric-card,
+  .models-hub-container .metric-card-modern,
+  .models-hub .metric-card-modern { grid-column: span 3; }
+}
+
+/* Tabs */
+.models-hub-container .harmony-tab-container,
+.models-hub .harmony-tab-container { 
+  width: 100%; 
+  margin: 24px 0 32px; 
+  background: #fff;
+  border-radius: 16px;
+  padding: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.models-hub-container .harmony-tab-navigation,
+.models-hub .harmony-tab-navigation { 
+  display: flex; 
+  gap: 8px; 
+  flex-wrap: wrap;
+  background: #f1f5f9;
+  border-radius: 12px;
+  padding: 4px;
+}
+
+.models-hub-container .harmony-tab-button,
+.models-hub .harmony-tab-button {
+  position: relative; 
+  border-radius: 10px; 
+  padding: 12px 20px;
+  border: none; 
+  background: transparent; 
+  font-weight: 600;
+  font-size: 14px;
+  display: inline-flex; 
+  align-items: center; 
+  gap: 8px; 
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #64748b;
+  flex: 1;
+  justify-content: center;
+}
+
+.models-hub-container .harmony-tab-button:hover,
+.models-hub .harmony-tab-button:hover { 
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.models-hub-container .harmony-tab-button.active,
+.models-hub .harmony-tab-button.active {
+  background: #3b82f6;
+  color: #fff;
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+  font-weight: 700;
+}
+
+.models-hub-container .tab-label,
+.models-hub .tab-label { 
+  font-weight: inherit; 
+  color: inherit; 
+}
+
+.models-hub-container .tab-indicator,
+.models-hub .tab-indicator {
+  position: absolute; 
+  inset-inline-end: 8px; 
+  width: 8px; 
+  height: 8px; 
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 0 2px rgba(16,185,129,.2);
+}
+
+/* Tab body should also be a grid */
+.models-hub-container .harmony-tab-content,
+.models-hub .harmony-tab-content {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 20px;
+  margin-top: 24px;
+  padding: 0;
+}
+
+/* Common cards inside tab content */
+.models-hub-container .model-card-modern,
+.models-hub .model-card-modern,
+.models-hub-container .dataset-card,
+.models-hub .dataset-card {
+  grid-column: span 12;
+  width: 100%;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.models-hub-container .model-card-modern:hover,
+.models-hub .model-card-modern:hover,
+.models-hub-container .dataset-card:hover,
+.models-hub .dataset-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border-color: #3b82f6;
+}
+@media (min-width: 1024px) {
+  .models-hub-container .model-card-modern,
+  .models-hub .model-card-modern,
+  .models-hub-container .dataset-card,
+  .models-hub .dataset-card { grid-column: span 4; }
+}
+@media (min-width: 1280px) {
+  .models-hub-container .model-card-modern,
+  .models-hub .model-card-modern,
+  .models-hub-container .dataset-card,
+  .models-hub .dataset-card { grid-column: span 3; }
+}
+
+/* Override any parent max-width constraints */
+.app .main-content .models-hub-container,
+.app .main-content .models-hub { max-width: none !important; }
+
+/* Additional styling improvements */
+.models-hub-container .dashboard-section,
+.models-hub .dashboard-section {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
+
+/* Metric card content styling */
+.models-hub-container .metric-card-top,
+.models-hub .metric-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.models-hub-container .metric-card-value,
+.models-hub .metric-card-value {
+  margin-bottom: 16px;
+}
+
+.models-hub-container .value-primary,
+.models-hub .value-primary {
+  font-size: 32px;
+  font-weight: 800;
+  color: #1f2937;
+  line-height: 1.2;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.models-hub-container .value-secondary,
+.models-hub .value-secondary {
+  font-size: 14px;
+  color: #6b7280;
+  display: block;
+}
+
+.models-hub-container .metric-card-content,
+.models-hub .metric-card-content {
+  margin-top: 8px;
+}
+
+.models-hub-container .metric-title,
+.models-hub .metric-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #374151;
+  margin: 0 0 4px 0;
+  line-height: 1.3;
+}
+
+.models-hub-container .metric-subtitle,
+.models-hub .metric-subtitle {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Growth indicator styling */
+.models-hub-container .growth-indicator,
+.models-hub .growth-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #10b981;
+}
+
+.models-hub-container .growth-indicator.no-growth,
+.models-hub .growth-indicator.no-growth {
+  color: #6b7280;
+}
+
+/* Icon container styling */
+.models-hub-container .icon-container,
+.models-hub .icon-container {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f4f6;
+}
+
+.models-hub-container .icon-container svg,
+.models-hub .icon-container svg {
+  width: 20px;
+  height: 20px;
+  color: #6b7280;
+}
+
+/* Force metric cards to display properly */
+.models-hub-container .metric-card,
+.models-hub .metric-card {
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 200px !important;
+  justify-content: space-between !important;
+}
+
+/* Ensure proper spacing and layout */
+.models-hub-container .metric-card > *,
+.models-hub .metric-card > * {
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Fix any potential display issues */
+.models-hub-container .metric-card *,
+.models-hub .metric-card * {
+  max-width: 100% !important;
+  word-wrap: break-word !important;
+}
+
+/* Ensure text is visible */
+.models-hub-container .metric-card h3,
+.models-hub .metric-card h3,
+.models-hub-container .metric-card p,
+.models-hub .metric-card p {
+  color: inherit !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Debug styles - remove these after fixing */
+.models-hub-container .metric-card {
+  border: 2px solid #ef4444 !important; /* Red border for debugging */
+  background: #fef2f2 !important; /* Light red background for debugging */
+}
+
+.models-hub-container .metric-card .metric-card-top {
+  background: #f3f4f6 !important;
+  padding: 8px !important;
+  border-radius: 8px !important;
+  margin-bottom: 12px !important;
+}
+
+.models-hub-container .metric-card .metric-card-value {
+  background: #dbeafe !important;
+  padding: 8px !important;
+  border-radius: 8px !important;
+  margin-bottom: 12px !important;
+}
+
+.models-hub-container .metric-card .metric-card-content {
+  background: #f0fdf4 !important;
+  padding: 8px !important;
+  border-radius: 8px !important;
+}

@@ -260,7 +260,7 @@ function TTS() {
     return (
       <div className="tts-loading">
         <div className="loading-content">
-          <div className="loading-spinner"></div>
+          <div className="unified-loading-spinner"></div>
           <h2 className="loading-title">در حال بارگذاری</h2>
           <p className="loading-subtitle loading-text">مدل‌های تبدیل متن به گفتار در حال بارگذاری هستند...</p>
         </div>
@@ -345,89 +345,89 @@ function TTS() {
 
       {/* Modern Metric Cards */}
       <div className="metrics-dashboard">
-        <div className="metric-card">
-          <div className="metric-card-top">
-            <div className="growth-indicator">
+        <div className="unified-metric-card">
+          <div className="unified-metric-card__top">
+            <div className="unified-metric-card__growth">
               <span className="growth-value">0%</span>
             </div>
-            <div className="icon-container model-icon">
+            <div className="unified-metric-card__icon model-icon">
               <Volume2 size={24} />
             </div>
           </div>
 
-          <div className="metric-card-value">
-            <span className="value-primary">{stats.total}</span>
+          <div className="unified-metric-card__value">
+            <span className="unified-metric-card__value-primary">{stats.total}</span>
           </div>
 
-          <div className="metric-card-content">
-            <h3 className="metric-title">کل مدل‌های TTS</h3>
-            <p className="metric-subtitle">مدل موجود</p>
+          <div className="unified-metric-card__content">
+            <h3 className="unified-metric-card__title">کل مدل‌های TTS</h3>
+            <p className="unified-metric-card__subtitle">مدل موجود</p>
           </div>
         </div>
 
-        <div className="metric-card">
-          <div className="metric-card-top">
-            <div className="growth-indicator">
+        <div className="unified-metric-card">
+          <div className="unified-metric-card__top">
+            <div className="unified-metric-card__growth">
               <span className="growth-value">8%+</span>
               <svg className="growth-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
-            <div className="icon-container success-icon">
+            <div className="unified-metric-card__icon success-icon">
               <CheckCircle size={24} />
             </div>
           </div>
 
-          <div className="metric-card-value">
-            <span className="value-primary">{stats.ready}</span>
+          <div className="unified-metric-card__value">
+            <span className="unified-metric-card__value-primary">{stats.ready}</span>
           </div>
 
-          <div className="metric-card-content">
-            <h3 className="metric-title">آماده</h3>
-            <p className="metric-subtitle">مدل آماده</p>
+          <div className="unified-metric-card__content">
+            <h3 className="unified-metric-card__title">آماده</h3>
+            <p className="unified-metric-card__subtitle">مدل آماده</p>
           </div>
         </div>
 
-        <div className="metric-card">
-          <div className="metric-card-top">
-            <div className="growth-indicator">
+        <div className="unified-metric-card">
+          <div className="unified-metric-card__top">
+            <div className="unified-metric-card__growth">
               <span className="growth-value">5%+</span>
               <svg className="growth-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
-            <div className="icon-container processing-icon">
+            <div className="unified-metric-card__icon processing-icon">
               <Clock size={24} />
             </div>
           </div>
 
-          <div className="metric-card-value">
-            <span className="value-primary">{stats.downloading}</span>
+          <div className="unified-metric-card__value">
+            <span className="unified-metric-card__value-primary">{stats.downloading}</span>
           </div>
 
-          <div className="metric-card-content">
-            <h3 className="metric-title">در حال دانلود</h3>
-            <p className="metric-subtitle">در حال پردازش</p>
+          <div className="unified-metric-card__content">
+            <h3 className="unified-metric-card__title">در حال دانلود</h3>
+            <p className="unified-metric-card__subtitle">در حال پردازش</p>
           </div>
         </div>
 
-        <div className="metric-card">
-          <div className="metric-card-top">
-            <div className="growth-indicator no-growth">
+        <div className="unified-metric-card">
+          <div className="unified-metric-card__top">
+            <div className="unified-metric-card__growth unified-metric-card__growth--no-growth">
               <span>0%</span>
             </div>
-            <div className="icon-container error-icon">
+            <div className="unified-metric-card__icon error-icon">
               <XCircle size={24} />
             </div>
           </div>
 
-          <div className="metric-card-value">
-            <span className="value-primary">{stats.error}</span>
+          <div className="unified-metric-card__value">
+            <span className="unified-metric-card__value-primary">{stats.error}</span>
           </div>
 
-          <div className="metric-card-content">
-            <h3 className="metric-title">خطا</h3>
-            <p className="metric-subtitle">نیاز به بررسی</p>
+          <div className="unified-metric-card__content">
+            <h3 className="unified-metric-card__title">خطا</h3>
+            <p className="unified-metric-card__subtitle">نیاز به بررسی</p>
           </div>
         </div>
       </div>
@@ -456,16 +456,16 @@ function TTS() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ delay: index * 0.05 }}
-              className={`model-card-modern tts-card ${selectedModels.includes(model.id) ? 'selected' : ''}`}
+              className={`unified-model-card tts-card ${selectedModels.includes(model.id) ? 'selected' : ''}`}
               onClick={() => handleModelSelect(model.id)}
             >
-              <div className="model-card-header">
-                <div className="model-icon-modern tts-icon">
+              <div className="unified-model-card__header">
+                <div className="unified-model-card__icon tts-icon">
                   <Volume2 size={20} />
                 </div>
-                <div className="model-info-modern">
-                  <h3 className="model-name-modern">{model.name}</h3>
-                  <p className="model-description-modern">{model.description}</p>
+                <div className="unified-model-card__info">
+                  <h3 className="unified-model-card__name">{model.name}</h3>
+                  <p className="unified-model-card__description">{model.description}</p>
                   {model.isHuggingFace && (
                     <div className="hf-badge">
                       <Star size={12} />
@@ -483,8 +483,8 @@ function TTS() {
                 </div>
               </div>
 
-              <div className="model-card-details">
-                <div className="model-meta-modern">
+              <div className="unified-model-card__details">
+                <div className="unified-model-card__meta">
                   <span className="model-type-badge type-tts">
                     TTS
                   </span>
@@ -494,7 +494,7 @@ function TTS() {
                   </span>
                 </div>
 
-                <div className="model-actions-modern">
+                <div className="unified-model-card__actions">
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}

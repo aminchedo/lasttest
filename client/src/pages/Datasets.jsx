@@ -369,7 +369,7 @@ function Datasets({ onToast = fallbackToast }) {
     return (
       <div className="datasets-loading">
         <div className="loading-content">
-          <div className="loading-spinner"></div>
+          <div className="unified-loading-spinner"></div>
           <h2 className="loading-title">در حال بارگذاری</h2>
           <p className="loading-subtitle loading-text">دیتاست‌ها در حال بارگذاری هستند...</p>
         </div>
@@ -413,93 +413,93 @@ function Datasets({ onToast = fallbackToast }) {
       ) : null}
 
       <div className="metrics-dashboard">
-        <div className="metric-card">
-          <div className="metric-card-top">
-            <div className="growth-indicator">
+        <div className="unified-metric-card">
+          <div className="unified-metric-card__top">
+            <div className="unified-metric-card__growth">
               <span className="growth-value">12%+</span>
               <svg className="growth-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
-            <div className="icon-container dataset-icon">
+            <div className="unified-metric-card__icon dataset-icon">
               <Database size={24} />
             </div>
           </div>
 
-          <div className="metric-card-value">
-            <span className="value-primary">{metrics.totalDatasets}</span>
+          <div className="unified-metric-card__value">
+            <span className="unified-metric-card__value-primary">{metrics.totalDatasets}</span>
           </div>
 
-          <div className="metric-card-content">
-            <h3 className="metric-title">تعداد کل دیتاست‌ها</h3>
-            <p className="metric-subtitle">دیتاست‌های موجود</p>
+          <div className="unified-metric-card__content">
+            <h3 className="unified-metric-card__title">تعداد کل دیتاست‌ها</h3>
+            <p className="unified-metric-card__subtitle">دیتاست‌های موجود</p>
           </div>
         </div>
 
-        <div className="metric-card">
-          <div className="metric-card-top">
-            <div className="growth-indicator">
+        <div className="unified-metric-card">
+          <div className="unified-metric-card__top">
+            <div className="unified-metric-card__growth">
               <span className="growth-value">8.5%+</span>
               <svg className="growth-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
-            <div className="icon-container model-icon">
+            <div className="unified-metric-card__icon model-icon">
               <HardDrive size={24} />
             </div>
           </div>
 
-          <div className="metric-card-value">
-            <span className="value-primary">{metrics.totalSize.toFixed(1)}</span>
-            <span className="value-secondary">GB</span>
+          <div className="unified-metric-card__value">
+            <span className="unified-metric-card__value-primary">{metrics.totalSize.toFixed(1)}</span>
+            <span className="unified-metric-card__value-secondary">GB</span>
           </div>
 
-          <div className="metric-card-content">
-            <h3 className="metric-title">حجم کل داده‌ها</h3>
-            <p className="metric-subtitle">حجم ذخیره شده</p>
+          <div className="unified-metric-card__content">
+            <h3 className="unified-metric-card__title">حجم کل داده‌ها</h3>
+            <p className="unified-metric-card__subtitle">حجم ذخیره شده</p>
           </div>
         </div>
 
-        <div className="metric-card">
-          <div className="metric-card-top">
-            <div className="growth-indicator no-growth">
+        <div className="unified-metric-card">
+          <div className="unified-metric-card__top">
+            <div className="unified-metric-card__growth unified-metric-card__growth--no-growth">
               <span>0%</span>
             </div>
-            <div className="icon-container processing-icon">
+            <div className="unified-metric-card__icon processing-icon">
               <Activity size={24} />
             </div>
           </div>
 
-          <div className="metric-card-value">
-            <span className="value-primary">{formatNumber(metrics.totalSamples)}</span>
+          <div className="unified-metric-card__value">
+            <span className="unified-metric-card__value-primary">{formatNumber(metrics.totalSamples)}</span>
           </div>
 
-          <div className="metric-card-content">
-            <h3 className="metric-title">تعداد کل نمونه‌ها</h3>
-            <p className="metric-subtitle">نمونه‌های موجود</p>
+          <div className="unified-metric-card__content">
+            <h3 className="unified-metric-card__title">تعداد کل نمونه‌ها</h3>
+            <p className="unified-metric-card__subtitle">نمونه‌های موجود</p>
           </div>
         </div>
 
-        <div className="metric-card">
-          <div className="metric-card-top">
-            <div className="growth-indicator">
+        <div className="unified-metric-card">
+          <div className="unified-metric-card__top">
+            <div className="unified-metric-card__growth">
               <span className="growth-value">5%+</span>
               <svg className="growth-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
-            <div className="icon-container success-icon">
+            <div className="unified-metric-card__icon success-icon">
               <CheckCircle size={24} />
             </div>
           </div>
 
-          <div className="metric-card-value">
-            <span className="value-primary">{metrics.readyDatasets}</span>
+          <div className="unified-metric-card__value">
+            <span className="unified-metric-card__value-primary">{metrics.readyDatasets}</span>
           </div>
 
-          <div className="metric-card-content">
-            <h3 className="metric-title">دیتاست‌های آماده</h3>
-            <p className="metric-subtitle">آماده برای استفاده</p>
+          <div className="unified-metric-card__content">
+            <h3 className="unified-metric-card__title">دیتاست‌های آماده</h3>
+            <p className="unified-metric-card__subtitle">آماده برای استفاده</p>
           </div>
         </div>
       </div>
