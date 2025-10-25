@@ -1,342 +1,390 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-    Download, FileText, Package, Calendar, Clock, CheckCircle,
-    RefreshCw, Filter, Search, Eye, Trash2, Share2
+    Download, FileText, Package, CheckCircle, Clock, XCircle,
+    Search, Database, Brain, Layers, HardDrive, Activity
 } from 'lucide-react';
-import api from '../api/endpoints';
-import { num, text, clamp, humanBytes } from '../utils/sanitize';
+import apiClient from '../api/endpoints';
+import { num, text } from '../utils/sanitize';
+
+// Mini progress bar component for download progress (reused from Models.jsx)
+function MiniProgressBar({ value }) {
+  const pct = Math.min(Math.max(value ?? 0, 0), 100);
+  return (
+    <div className="w-full h-[2px] bg-slate-200 rounded-full overflow-hidden">
+      <div
+        className="h-full rounded-full bg-gradient-to-l from-fuchsia-500 to-violet-500 transition-[width] duration-200 ease-linear"
+        style={{ width: pct + '%' }}
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={pct}
+      />
+    </div>
+  );
+}
 
 function Exports() {
-    const [exportList, setExportList] = useState([]);
-    const [url, setUrl] = useState('');
-    const [dest, setDest] = useState('downloads/exports');
-    const [jobId, setJobId] = useState(null);
-    const [status, setStatus] = useState(null);
-    const [progress, setProgress] = useState(0);
-    const pollRef = useRef(null);
-
-    async function startExportDl() {
-        // TODO: Implement export download functionality
-        console.log('Export download:', url, dest);
-    }
-
+    const [assets, setAssets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterType, setFilterType] = useState('all');
 
-    useEffect(() => {
-        loadExports();
-    }, []);
+    // Computed metrics from assets
+    const totalAssets = assets.length;
+    const readyAssets = assets.filter(a => a.status === 'ready').length;
+    const totalSizeGb = assets.reduce((sum, a) => {
+        const sizeGb = parseFloat(a.sizeGb) || 0;
+        return sum + sizeGb;
+    }, 0).toFixed(1);
+    const downloadsThisMonth = 0; // Placeholder since we don't have per-month timestamp
 
-    const loadExports = async () => {
+    // Load all assets from multiple sources
+    const loadAssets = async () => {
         setLoading(true);
         try {
-            const result = await api.getExports();
-            if (result.ok && result.data) {
-                // Ensure we always get an array
-                const exportData = Array.isArray(result.data) ? result.data : [];
-                setExportList(exportData);
-            } else {
-                console.error('Error loading exports:', result.error);
-                setExportList([]);
+            const [modelsResult, datasetsResult, trainingAssetsResult] = await Promise.all([
+                apiClient.getCatalogModels().catch(() => ({ ok: false, data: [] })),
+                apiClient.getCatalogDatasets().catch(() => ({ ok: false, data: [] })),
+                apiClient.getTrainingAssets().catch(() => ({ ok: false, data: [] }))
+            ]);
+
+            const unifiedAssets = [];
+
+            // Process models
+            if (modelsResult.ok && modelsResult.data) {
+                const modelsArray = Array.isArray(modelsResult.data) ? modelsResult.data : [];
+                modelsArray.forEach(model => {
+                    unifiedAssets.push({
+                        id: model.id || `model-${Date.now()}-${Math.random()}`,
+                        name: model.name || model.title || 'نام نامشخص',
+                        kind: 'model',
+                        sizeLabel: model.size || model.sizeLabel || 'نامشخص',
+                        sizeGb: parseSizeToGb(model.size || model.sizeLabel),
+                        status: model.status || 'ready',
+                        source: model.source || model.origin || 'local',
+                        downloadedAt: model.downloadedAt || model.createdAt
+                    });
+                });
             }
+
+            // Process datasets
+            if (datasetsResult.ok && datasetsResult.data) {
+                const datasetsArray = Array.isArray(datasetsResult.data) ? datasetsResult.data : [];
+                datasetsArray.forEach(dataset => {
+                    unifiedAssets.push({
+                        id: dataset.id || `dataset-${Date.now()}-${Math.random()}`,
+                        name: dataset.name || dataset.title || 'نام نامشخص',
+                        kind: 'dataset',
+                        sizeLabel: dataset.size || dataset.sizeLabel || 'نامشخص',
+                        sizeGb: parseSizeToGb(dataset.size || dataset.sizeLabel),
+                        status: dataset.status || 'ready',
+                        source: dataset.source || dataset.origin || 'local',
+                        downloadedAt: dataset.downloadedAt || dataset.createdAt
+                    });
+                });
+            }
+
+            // Process training assets/checkpoints
+            if (trainingAssetsResult.ok && trainingAssetsResult.data) {
+                const assetsArray = Array.isArray(trainingAssetsResult.data) ? trainingAssetsResult.data : [];
+                assetsArray.forEach(asset => {
+                    unifiedAssets.push({
+                        id: asset.id || `checkpoint-${Date.now()}-${Math.random()}`,
+                        name: asset.name || asset.title || 'نام نامشخص',
+                        kind: asset.kind || 'checkpoint',
+                        sizeLabel: asset.size || asset.sizeLabel || 'نامشخص',
+                        sizeGb: parseSizeToGb(asset.size || asset.sizeLabel),
+                        status: asset.status || 'ready',
+                        source: asset.source || 'training output',
+                        downloadedAt: asset.downloadedAt || asset.createdAt
+                    });
+                });
+            }
+
+            setAssets(unifiedAssets);
         } catch (error) {
-            console.error('Error loading exports:', error);
-            setExportList([]);
+            console.error('Error loading assets:', error);
+            setAssets([]);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleDownloadExport = async (id) => {
-        try {
-            const result = await api.downloadExport(id);
-            if (result.ok && result.data) {
-                const url = window.URL.createObjectURL(result.data);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `export-${id}.zip`;
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
-            } else {
-                alert('خطا در دانلود فایل');
-            }
-        } catch (error) {
-            console.error('Error downloading export:', error);
-            alert('خطا در دانلود فایل');
-        }
+    // Helper to parse size strings to GB
+    const parseSizeToGb = (sizeStr) => {
+        if (!sizeStr) return 0;
+        if (typeof sizeStr === 'number') return sizeStr;
+        
+        const str = String(sizeStr).toLowerCase();
+        const numMatch = str.match(/[\d.]+/);
+        if (!numMatch) return 0;
+        
+        const num = parseFloat(numMatch[0]);
+        if (str.includes('gb')) return num;
+        if (str.includes('mb')) return num / 1024;
+        if (str.includes('kb')) return num / (1024 * 1024);
+        return 0;
     };
 
-    const handleDeleteExport = async (id) => {
-        if (!window.confirm('آیا از حذف این خروجی اطمینان دارید؟')) {
-            return;
-        }
-        try {
-            const result = await api.deleteExport(id);
-            if (result.ok) {
-                setExportList(exportList.filter(e => e.id !== id));
-            } else {
-                alert('خطا در حذف خروجی');
-            }
-        } catch (error) {
-            console.error('Error deleting export:', error);
-            alert('خطا در حذف خروجی');
-        }
-    };
+    useEffect(() => {
+        loadAssets();
+    }, []);
 
-
-    const filteredExports = exportList.filter(exportItem => {
-        const matchesSearch = exportItem.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            exportItem.description.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesFilter = filterType === 'all' || exportItem.type === filterType;
+    // Filter assets based on search and filter type
+    const filteredAssets = assets.filter(asset => {
+        const matchesSearch = asset.name.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesFilter = filterType === 'all' || asset.kind === filterType;
         return matchesSearch && matchesFilter;
     });
 
-    const totalDownloads = exportList.reduce((sum, exportItem) => {
-        return sum + num(exportItem?.downloads, 0);
-    }, 0);
-
-    const totalSizeGb = exportList.reduce((sum, exportItem) => {
-        const rawSize = exportItem?.size;
-        if (rawSize === null || rawSize === undefined) {
-            return sum;
-        }
-
-        if (typeof rawSize === 'number' && Number.isFinite(rawSize)) {
-            return sum + rawSize / 1024;
-        }
-
-        const sizeString = String(rawSize).trim();
-        const numericPart = num(parseFloat(sizeString.replace(/[^\d.]/g, '')), 0);
-        if (!Number.isFinite(numericPart) || numericPart <= 0) {
-            return sum;
-        }
-
-        const inGb = sizeString.toLowerCase().includes('gb')
-            ? numericPart
-            : numericPart / 1024;
-
-        return sum + inGb;
-    }, 0);
-
-    const totalSizeGbDisplay = Number.isFinite(totalSizeGb)
-        ? totalSizeGb.toFixed(1)
-        : '0.0';
-
-    const getStatusIcon = (status) => {
-        switch (status) {
-            case 'ready': return <CheckCircle size={16} className="text-green-500" />;
-            case 'processing': return <Clock size={16} className="text-blue-500 animate-spin" />;
-            case 'error': return <Clock size={16} className="text-red-500" />;
-            default: return <Clock size={16} className="text-gray-500" />;
+    // Get kind label in Persian
+    const getKindLabel = (kind) => {
+        switch (kind) {
+            case 'model': return 'مدل';
+            case 'dataset': return 'دیتاست';
+            case 'checkpoint': return 'خروجی آموزش';
+            case 'tts': return 'TTS';
+            default: return kind;
         }
     };
 
-    const getTypeIcon = (type) => {
-        switch (type) {
-            case 'report': return <FileText size={20} className="text-blue-500" />;
-            case 'model': return <Package size={20} className="text-purple-500" />;
-            default: return <FileText size={20} className="text-gray-500" />;
+    // Get status icon and label
+    const getStatusDisplay = (status) => {
+        switch (status) {
+            case 'ready':
+                return { icon: <CheckCircle size={14} className="text-green-500" />, label: 'آماده' };
+            case 'downloading':
+                return { icon: <Clock size={14} className="text-blue-500 animate-pulse" />, label: 'در حال دانلود' };
+            case 'error':
+                return { icon: <XCircle size={14} className="text-red-500" />, label: 'خطا' };
+            default:
+                return { icon: <Clock size={14} className="text-slate-400" />, label: 'نامشخص' };
         }
     };
 
     if (loading) {
         return (
-            <div className="exports-page animate-fadeInUp">
-                <div className="page-header">
-                    <div>
-                        <h1 className="page-title">
-                            📤 مدیریت خروجی‌ها
-                        </h1>
-                        <p className="helper">مدیریت فایل‌های خروجی و گزارش‌ها</p>
+            <div className="w-full flex flex-col items-stretch bg-[#F5F7FB] text-slate-900 rtl pb-24">
+                <div className="w-full max-w-[1400px] mx-auto px-4 flex flex-col gap-6 pt-6">
+                    <div className="bg-white rounded-[14px] border border-slate-200/60 shadow-[0_20px_40px_-8px_rgba(15,23,42,0.07),0_2px_4px_rgba(15,23,42,0.04)] p-6 flex items-center justify-center min-h-[200px]">
+                        <div className="flex flex-col items-center gap-3">
+                            <div className="w-10 h-10 border-3 border-violet-500 border-t-transparent rounded-full animate-spin"></div>
+                            <p className="text-sm text-slate-600">در حال بارگذاری منابع...</p>
+                        </div>
                     </div>
-                </div>
-
-                <div className="loading-container">
-                    <div className="unified-loading-spinner"></div>
-                    <p className="loading-text">در حال بارگذاری خروجی‌ها...</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="container-12 animate-fadeInUp">
-            <div className="page-header">
-                <div>
-                    <h1 className="page-title">
-                        📤 مدیریت خروجی‌ها
-                    </h1>
-                    <p className="helper">مدیریت فایل‌های خروجی و گزارش‌ها</p>
-                </div>
-                <div className="page-actions">
-                    <button className="glass-button">
-                        <RefreshCw size={16} />
+        <div className="w-full flex flex-col items-stretch bg-[#F5F7FB] text-slate-900 rtl pb-24">
+            <div className="w-full max-w-[1400px] mx-auto px-4 flex flex-col gap-6 pt-6">
+                
+                {/* Page Header */}
+                <div className="bg-white rounded-[14px] border border-slate-200/60 shadow-[0_20px_40px_-8px_rgba(15,23,42,0.07),0_2px_4px_rgba(15,23,42,0.04)] p-6 flex items-center justify-between">
+                    <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-3">
+                            <h1 className="text-2xl font-bold text-slate-900">منابع موجود</h1>
+                            <span className="px-3 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-full border border-green-200">
+                                آنلاین
+                            </span>
+                        </div>
+                        <p className="text-sm text-slate-600">
+                            تمام مدل‌ها، دیتاست‌ها و خروجی‌های قابل استفاده روی این سیستم
+                        </p>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={loadAssets}
+                        className="px-4 py-2 bg-gradient-to-l from-fuchsia-500 to-violet-500 text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2"
+                    >
+                        <Download size={16} />
                         بروزرسانی
                     </button>
                 </div>
-            </div>
 
-            {/* Stats Overview */}
-            <div className="stats-grid">
-                <div className="stat-card metric-purple animate-fadeInUp animation-delay-100">
-                    <div className="stat-header">
-                        <div className="stat-icon">📄</div>
-                        <span className="stat-trend">↑</span>
-                    </div>
-                    <div className="stat-content">
-                        <p className="stat-value">{exportList.length}</p>
-                        <p className="stat-label">فایل‌های خروجی</p>
-                        <p className="stat-sublabel">کل فایل‌ها</p>
-                    </div>
-                </div>
-
-                <div className="stat-card metric-blue animate-fadeInUp animation-delay-200">
-                    <div className="stat-header">
-                        <div className="stat-icon">📊</div>
-                        <span className="stat-trend">↑</span>
-                    </div>
-                    <div className="stat-content">
-                        <p className="stat-value">{totalDownloads}</p>
-                        <p className="stat-label">کل دانلودها</p>
-                        <p className="stat-sublabel">این ماه</p>
-                    </div>
-                </div>
-
-                <div className="stat-card metric-green animate-fadeInUp animation-delay-300">
-                    <div className="stat-header">
-                        <div className="stat-icon">💾</div>
-                    </div>
-                    <div className="stat-content">
-                        <p className="stat-value">{text(totalSizeGbDisplay)} GB</p>
-                        <p className="stat-label">حجم کل</p>
-                        <p className="stat-sublabel">ذخیره‌سازی</p>
-                    </div>
-                </div>
-
-                <div className="stat-card metric-orange animate-fadeInUp animation-delay-400">
-                    <div className="stat-header">
-                        <div className="stat-icon">✅</div>
-                    </div>
-                    <div className="stat-content">
-                        <p className="stat-value">{exportList.filter(e => e.status === 'ready').length}</p>
-                        <p className="stat-label">آماده دانلود</p>
-                        <p className="stat-sublabel">از {exportList.length} فایل</p>
-                    </div>
-                </div>
-            </div>
-
-            {/* Enhanced Filters */}
-            <div className="filters-section glass-card animate-fadeInUp animation-delay-500">
-                <div className="search-container">
-                    <div className="search-box">
-                        <Search size={20} />
-                        <input
-                            type="text"
-                            className="glass-input"
-                            placeholder="جستجو در خروجی‌ها..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
-                </div>
-
-                <div className="filter-buttons">
-                    <button
-                        className={`filter-btn ${filterType === 'all' ? 'active' : ''}`}
-                        onClick={() => setFilterType('all')}
-                    >
-                        <FileText size={16} />
-                        همه
-                    </button>
-                    <button
-                        className={`filter-btn ${filterType === 'report' ? 'active' : ''}`}
-                        onClick={() => setFilterType('report')}
-                    >
-                        <FileText size={16} />
-                        گزارش‌ها
-                    </button>
-                    <button
-                        className={`filter-btn ${filterType === 'model' ? 'active' : ''}`}
-                        onClick={() => setFilterType('model')}
-                    >
-                        <Package size={16} />
-                        مدل‌ها
-                    </button>
-                </div>
-            </div>
-
-            {/* Enhanced Exports Grid */}
-            <div className="exports-grid">
-                {filteredExports.length > 0 ? (
-                    filteredExports.map((exportItem, index) => (
-                        <div
-                            key={exportItem.id}
-                            className="export-card interactive-card animate-fadeInUp"
-                            style={{ animationDelay: `${index * 0.1}s` }}
-                        >
-                            <div className="export-header">
-                                <div className="export-icon">
-                                    {getTypeIcon(exportItem.type)}
-                                </div>
-                                <div className="export-info">
-                                    <h3 className="export-name">{exportItem.name}</h3>
-                                    <p className="export-description">{text(exportItem?.description, 'بدون توضیحات')}</p>
-                                    <div className="export-meta">
-                                        <span className="export-format">{text(exportItem?.format, 'نامشخص')}</span>
-                                        <span className="export-size">{text(exportItem?.size, '0 MB')}</span>
-                                    </div>
-                                </div>
-                                <div className="export-status">
-                                    {getStatusIcon(exportItem.status)}
-                                    <span className="status-text">
-                                        {exportItem.status === 'ready' && 'آماده'}
-                                        {exportItem.status === 'processing' && 'در حال پردازش'}
-                                        {exportItem.status === 'error' && 'خطا'}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div className="export-details">
-                                <div className="export-metrics">
-                                    <div className="metric-item">
-                                        <Download size={14} />
-                                        <span>{text(num(exportItem?.downloads, 0))} دانلود</span>
-                                    </div>
-                                    <div className="metric-item">
-                                        <Calendar size={14} />
-                                        <span>{text(exportItem?.createdAt, 'نامشخص')}</span>
-                                    </div>
-                                </div>
-
-                                <div className="export-footer">
-                                    <div className="export-actions">
-                                        <button className="action-btn">
-                                            <Eye size={16} />
-                                        </button>
-                                        <button className="action-btn">
-                                            <Download size={16} />
-                                        </button>
-                                        <button className="action-btn">
-                                            <Share2 size={16} />
-                                        </button>
-                                        <button className="action-btn danger">
-                                            <Trash2 size={16} />
-                                        </button>
-                                    </div>
-                                </div>
+                {/* Metrics Row */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+                    {/* Total Assets */}
+                    <div className="bg-white rounded-[14px] border border-slate-200/60 shadow-[0_20px_40px_-8px_rgba(15,23,42,0.07),0_2px_4px_rgba(15,23,42,0.04)] p-5 flex flex-col gap-3">
+                        <div className="flex items-center justify-between">
+                            <div className="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center">
+                                <Layers size={20} className="text-violet-600" />
                             </div>
                         </div>
-                    ))
-                ) : (
-                    <div className="no-exports glass-card">
-                        <FileText size={64} />
-                        <h3>هیچ خروجی‌ای یافت نشد</h3>
-                        <p>برای شروع، یک مدل آموزش دهید</p>
+                        <div className="flex flex-col gap-1">
+                            <p className="text-3xl font-bold text-slate-900">{totalAssets}</p>
+                            <p className="text-xs text-slate-600 font-medium">تعداد کل منابع</p>
+                        </div>
                     </div>
-                )}
+
+                    {/* Downloads This Month */}
+                    <div className="bg-white rounded-[14px] border border-slate-200/60 shadow-[0_20px_40px_-8px_rgba(15,23,42,0.07),0_2px_4px_rgba(15,23,42,0.04)] p-5 flex flex-col gap-3">
+                        <div className="flex items-center justify-between">
+                            <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
+                                <Download size={20} className="text-blue-600" />
+                            </div>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                            <p className="text-3xl font-bold text-slate-900">{downloadsThisMonth}</p>
+                            <p className="text-xs text-slate-600 font-medium">کل دانلودها این ماه</p>
+                        </div>
+                    </div>
+
+                    {/* Total Storage */}
+                    <div className="bg-white rounded-[14px] border border-slate-200/60 shadow-[0_20px_40px_-8px_rgba(15,23,42,0.07),0_2px_4px_rgba(15,23,42,0.04)] p-5 flex flex-col gap-3">
+                        <div className="flex items-center justify-between">
+                            <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center">
+                                <HardDrive size={20} className="text-green-600" />
+                            </div>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                            <p className="text-3xl font-bold text-slate-900">{totalSizeGb} GB</p>
+                            <p className="text-xs text-slate-600 font-medium">حجم کل ذخیره‌سازی</p>
+                        </div>
+                    </div>
+
+                    {/* Ready to Use */}
+                    <div className="bg-white rounded-[14px] border border-slate-200/60 shadow-[0_20px_40px_-8px_rgba(15,23,42,0.07),0_2px_4px_rgba(15,23,42,0.04)] p-5 flex flex-col gap-3">
+                        <div className="flex items-center justify-between">
+                            <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center">
+                                <CheckCircle size={20} className="text-orange-600" />
+                            </div>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                            <p className="text-3xl font-bold text-slate-900">{readyAssets}</p>
+                            <p className="text-xs text-slate-600 font-medium">آماده استفاده الان</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Assets List Card */}
+                <div className="bg-white rounded-[14px] border border-slate-200/60 shadow-[0_20px_40px_-8px_rgba(15,23,42,0.07),0_2px_4px_rgba(15,23,42,0.04)] p-4 flex flex-col gap-4">
+                    {/* Search and Filters */}
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                        {/* Search */}
+                        <div className="flex-1 relative">
+                            <Search size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                            <input
+                                type="text"
+                                placeholder="جستجو در منابع..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full pr-10 pl-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500"
+                            />
+                        </div>
+                        
+                        {/* Filter Tabs */}
+                        <div className="flex items-center gap-2">
+                            <button
+                                type="button"
+                                onClick={() => setFilterType('all')}
+                                className={`px-4 py-2 text-xs font-medium rounded-lg transition-all ${
+                                    filterType === 'all'
+                                        ? 'bg-violet-50 text-violet-700 border border-violet-200'
+                                        : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100'
+                                }`}
+                            >
+                                همه
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setFilterType('model')}
+                                className={`px-4 py-2 text-xs font-medium rounded-lg transition-all flex items-center gap-1 ${
+                                    filterType === 'model'
+                                        ? 'bg-violet-50 text-violet-700 border border-violet-200'
+                                        : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100'
+                                }`}
+                            >
+                                <Brain size={14} />
+                                مدل‌ها
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setFilterType('dataset')}
+                                className={`px-4 py-2 text-xs font-medium rounded-lg transition-all flex items-center gap-1 ${
+                                    filterType === 'dataset'
+                                        ? 'bg-violet-50 text-violet-700 border border-violet-200'
+                                        : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100'
+                                }`}
+                            >
+                                <Database size={14} />
+                                دیتاست‌ها
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setFilterType('checkpoint')}
+                                className={`px-4 py-2 text-xs font-medium rounded-lg transition-all flex items-center gap-1 ${
+                                    filterType === 'checkpoint'
+                                        ? 'bg-violet-50 text-violet-700 border border-violet-200'
+                                        : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100'
+                                }`}
+                            >
+                                <Package size={14} />
+                                گزارش‌ها
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Assets List */}
+                    <div className="flex flex-col gap-2">
+                        {filteredAssets.length > 0 ? (
+                            filteredAssets.map((asset) => {
+                                const statusDisplay = getStatusDisplay(asset.status);
+                                return (
+                                    <div
+                                        key={asset.id}
+                                        className="flex items-center justify-between text-[12px] text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200/60 rounded-[10px] px-3 py-2 transition-colors"
+                                    >
+                                        {/* Asset Info */}
+                                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                                            <div className="flex-shrink-0">
+                                                {asset.kind === 'model' && <Brain size={16} className="text-violet-600" />}
+                                                {asset.kind === 'dataset' && <Database size={16} className="text-blue-600" />}
+                                                {asset.kind === 'checkpoint' && <Package size={16} className="text-green-600" />}
+                                            </div>
+                                            <div className="flex flex-col min-w-0">
+                                                <span className="font-medium text-slate-900 truncate">{asset.name}</span>
+                                                <span className="text-[10px] text-slate-500">{getKindLabel(asset.kind)}</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Size */}
+                                        <div className="flex-shrink-0 px-3 text-slate-600">
+                                            {asset.sizeLabel}
+                                        </div>
+
+                                        {/* Status */}
+                                        <div className="flex-shrink-0 flex items-center gap-1.5 px-3">
+                                            {statusDisplay.icon}
+                                            <span className="text-[11px]">{statusDisplay.label}</span>
+                                        </div>
+
+                                        {/* Source */}
+                                        <div className="flex-shrink-0 px-3 text-slate-500 text-[11px]">
+                                            {asset.source}
+                                        </div>
+
+                                        {/* Progress bar for downloading */}
+                                        {asset.status === 'downloading' && (
+                                            <div className="flex-shrink-0 w-24">
+                                                <MiniProgressBar value={asset.progress || 0} />
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })
+                        ) : (
+                            <div className="flex flex-col items-center justify-center py-12 text-slate-500">
+                                <FileText size={48} className="text-slate-300 mb-3" />
+                                <p className="text-sm font-medium">هیچ منبعی یافت نشد</p>
+                                <p className="text-xs text-slate-400 mt-1">برای شروع، یک مدل یا دیتاست دانلود کنید</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
             </div>
         </div>
     );
