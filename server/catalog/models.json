@@ -1,0 +1,72 @@
+[
+  {
+    "id": "gpt2-persian",
+    "name": "GPT-2 Persian",
+    "description": "مدل GPT-2 فارسی برای تولید متن و آموزش",
+    "type": "text-generation",
+    "size": "1.2GB",
+    "parameters": 124000000,
+    "source": "HooshvareLab",
+    "huggingfaceId": "HooshvareLab/gpt2-fa",
+    "architecture": "GPT-2",
+    "language": "fa",
+    "tasks": ["text-generation", "fine-tuning"],
+    "status": "ready"
+  },
+  {
+    "id": "bert-fa",
+    "name": "BERT Persian",
+    "description": "مدل BERT پایه فارسی برای طبقه‌بندی و آموزش",
+    "type": "classification",
+    "size": "420MB",
+    "parameters": 110000000,
+    "source": "HooshvareLab",
+    "huggingfaceId": "HooshvareLab/bert-fa-base-uncased",
+    "architecture": "BERT",
+    "language": "fa",
+    "tasks": ["classification", "token-classification", "fine-tuning"],
+    "status": "ready"
+  },
+  {
+    "id": "roberta-fa",
+    "name": "RoBERTa Persian",
+    "description": "مدل RoBERTa فارسی برای NLP",
+    "type": "token-classification",
+    "size": "480MB",
+    "parameters": 125000000,
+    "source": "HooshvareLab",
+    "huggingfaceId": "HooshvareLab/roberta-fa-base",
+    "architecture": "RoBERTa",
+    "language": "fa",
+    "tasks": ["token-classification", "ner", "fine-tuning"],
+    "status": "ready"
+  },
+  {
+    "id": "t5-fa",
+    "name": "T5 Persian",
+    "description": "مدل T5 فارسی برای translation و summarization",
+    "type": "seq2seq",
+    "size": "900MB",
+    "parameters": 223000000,
+    "source": "HooshvareLab",
+    "huggingfaceId": "HooshvareLab/t5-fa-base",
+    "architecture": "T5",
+    "language": "fa",
+    "tasks": ["translation", "summarization", "fine-tuning"],
+    "status": "ready"
+  },
+  {
+    "id": "albert-fa",
+    "name": "ALBERT Persian",
+    "description": "مدل ALBERT فارسی - نسخه سبک‌تر BERT",
+    "type": "classification",
+    "size": "180MB",
+    "parameters": 12000000,
+    "source": "m3hrdadfi",
+    "huggingfaceId": "m3hrdadfi/albert-fa-base-v2",
+    "architecture": "ALBERT",
+    "language": "fa",
+    "tasks": ["classification", "fine-tuning"],
+    "status": "ready"
+  }
+]
