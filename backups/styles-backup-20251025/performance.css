@@ -1,0 +1,279 @@
+/* Performance Optimization CSS */
+
+/* Critical CSS - Above the fold */
+.critical-content {
+    contain: layout style paint;
+    will-change: auto;
+}
+
+/* Non-critical content */
+.non-critical {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 500px;
+}
+
+/* Optimize animations */
+.optimized-animation {
+    will-change: transform, opacity;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+}
+
+/* Reduce repaints */
+.stable-layout {
+    contain: layout;
+}
+
+.stable-style {
+    contain: style;
+}
+
+.stable-paint {
+    contain: paint;
+}
+
+/* GPU acceleration for smooth scrolling */
+.smooth-scroll {
+    transform: translateZ(0);
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+}
+
+/* Optimize images */
+.optimized-image {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    object-fit: cover;
+    object-position: center;
+}
+
+/* Lazy loading placeholder */
+.lazy-placeholder {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+/* Reduce layout shifts */
+.aspect-ratio-container {
+    position: relative;
+    width: 100%;
+    height: 0;
+    padding-bottom: 56.25%;
+    /* 16:9 aspect ratio */
+}
+
+.aspect-ratio-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* Optimize fonts */
+.font-display-swap {
+    font-display: swap;
+}
+
+/* Critical resource hints */
+.preload-critical {
+    font-display: swap;
+    font-weight: 400;
+}
+
+/* Reduce bundle size with CSS custom properties */
+:root {
+    --color-primary: #3b82f6;
+    --color-secondary: #6b7280;
+    --color-success: #10b981;
+    --color-warning: #f59e0b;
+    --color-danger: #ef4444;
+
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+
+    --border-radius-sm: 0.25rem;
+    --border-radius-md: 0.5rem;
+    --border-radius-lg: 0.75rem;
+    --border-radius-xl: 1rem;
+
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+
+    --transition-fast: 150ms ease;
+    --transition-base: 300ms ease;
+    --transition-slow: 500ms ease;
+}
+
+/* Utility classes for common patterns */
+.text-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.flex-between {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.grid-responsive {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-md);
+}
+
+/* Optimize for mobile */
+@media (max-width: 768px) {
+    .mobile-optimized {
+        font-size: 14px;
+        line-height: 1.4;
+    }
+
+    .mobile-touch-target {
+        min-height: 44px;
+        min-width: 44px;
+    }
+}
+
+/* Reduce paint complexity */
+.simple-background {
+    background: var(--color-primary);
+    background-image: none;
+}
+
+/* Optimize transforms */
+.transform-gpu {
+    transform: translateZ(0);
+    will-change: transform;
+}
+
+/* Reduce layout complexity */
+.simple-layout {
+    display: block;
+    position: static;
+    float: none;
+}
+
+/* Optimize for printing */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+
+    .print-optimized {
+        color: black !important;
+        background: white !important;
+    }
+}
+
+/* Performance monitoring */
+.performance-warning {
+    border: 2px solid var(--color-warning);
+    background: rgba(245, 158, 11, 0.1);
+}
+
+.performance-critical {
+    border: 2px solid var(--color-danger);
+    background: rgba(239, 68, 68, 0.1);
+}
+
+/* Optimize animations for 60fps */
+@keyframes optimized-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes optimized-slide-in {
+    from {
+        transform: translateX(-100%);
+    }
+
+    to {
+        transform: translateX(0);
+    }
+}
+
+.animate-fade-in {
+    animation: optimized-fade-in 0.3s ease-out;
+}
+
+.animate-slide-in {
+    animation: optimized-slide-in 0.3s ease-out;
+}
+
+/* Reduce CSS complexity */
+.simplified-card {
+    background: white;
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-md);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid #e5e7eb;
+}
+
+.simplified-button {
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-weight: 500;
+    transition: var(--transition-fast);
+    cursor: pointer;
+}
+
+.simplified-button:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+}
+
+/* Optimize for Core Web Vitals */
+.lcp-optimized {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 400px;
+}
+
+.cls-optimized {
+    aspect-ratio: 16 / 9;
+}
+
+.fid-optimized {
+    touch-action: manipulation;
+}
+
+/* Reduce unused CSS */
+.unused-removal {
+    /* This class should be removed by build tools */
+    display: none;
+}
+
+/* Critical path optimization */
+.above-fold {
+    contain: layout style paint;
+    will-change: auto;
+}
+
+.below-fold {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 600px;
+}
