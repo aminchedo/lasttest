@@ -584,14 +584,15 @@ const Training = () => {
     const isCompleted = trainingState === TRAINING_STATE.COMPLETED;
 
     return (
-      <div className="training-controls">
+      <div className="flex flex-wrap gap-3">
         {isIdle && (
           <motion.button
+            type="button"
             onClick={handleStartTraining}
-            className="btn btn-primary btn-lg"
+            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-shadow disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={!selectedBaseModel || selectedDatasets.length === 0}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
             <Play size={20} />
             <span>شروع آموزش</span>
@@ -601,20 +602,22 @@ const Training = () => {
         {isRunning && (
           <>
             <motion.button
+              type="button"
               onClick={handlePauseTraining}
-              className="btn btn-warning"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              className="flex items-center gap-2 px-6 py-3 bg-yellow-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-shadow"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
               <Pause size={20} />
               <span>توقف موقت</span>
             </motion.button>
 
             <motion.button
+              type="button"
               onClick={handleStopTraining}
-              className="btn btn-danger"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              className="flex items-center gap-2 px-6 py-3 bg-red-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-shadow"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
               <Square size={20} />
               <span>پایان آموزش</span>
@@ -625,20 +628,22 @@ const Training = () => {
         {isPaused && (
           <>
             <motion.button
+              type="button"
               onClick={handleResumeTraining}
-              className="btn btn-success"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              className="flex items-center gap-2 px-6 py-3 bg-green-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-shadow"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
               <Play size={20} />
               <span>ادامه آموزش</span>
             </motion.button>
 
             <motion.button
+              type="button"
               onClick={handleStopTraining}
-              className="btn btn-danger"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              className="flex items-center gap-2 px-6 py-3 bg-red-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-shadow"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
               <Square size={20} />
               <span>پایان آموزش</span>
@@ -649,33 +654,36 @@ const Training = () => {
         {isCompleted && (
           <>
             <motion.button
+              type="button"
               onClick={handleSaveModel}
-              className="btn btn-primary"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-shadow"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
               <Save size={20} />
               <span>ذخیره مدل</span>
             </motion.button>
 
             <motion.button
+              type="button"
               onClick={handleExportMetrics}
-              className="btn btn-secondary"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              className="flex items-center gap-2 px-6 py-3 bg-slate-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-shadow"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
               <Download size={20} />
               <span>Export متریک‌ها</span>
             </motion.button>
 
             <motion.button
+              type="button"
               onClick={() => {
                 setTrainingState(TRAINING_STATE.IDLE);
                 resetMetrics();
               }}
-              className="btn btn-ghost"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              className="flex items-center gap-2 px-6 py-3 border-2 border-slate-200 text-slate-700 font-semibold rounded-xl hover:bg-slate-50 transition-colors"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
               <RefreshCw size={20} />
               <span>آموزش جدید</span>
@@ -687,19 +695,19 @@ const Training = () => {
   };
 
   const renderProgressBar = () => (
-    <div className="progress-section">
-      <div className="progress-header">
-        <div className="progress-info">
-          <span className="progress-label">پیشرفت آموزش</span>
-          <span className="progress-percentage">{metrics.progress.toFixed(1)}%</span>
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-medium text-slate-700">پیشرفت آموزش</span>
+          <span className="text-lg font-bold text-violet-600">{metrics.progress.toFixed(1)}%</span>
         </div>
-        <div className="progress-time">
-          <div className="time-item">
+        <div className="flex items-center gap-4 text-sm text-slate-600">
+          <div className="flex items-center gap-1">
             <Clock size={14} />
             <span>{formatTime(metrics.timeElapsed)}</span>
           </div>
           {metrics.timeRemaining > 0 && (
-            <div className="time-item">
+            <div className="flex items-center gap-1">
               <Timer size={14} />
               <span>~{formatTime(metrics.timeRemaining)}</span>
             </div>
@@ -707,9 +715,9 @@ const Training = () => {
         </div>
       </div>
 
-      <div className="progress-bar-container">
+      <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
         <motion.div
-          className="progress-bar-fill"
+          className="h-full bg-gradient-to-r from-violet-500 to-fuchsia-500 rounded-full"
           initial={{ width: 0 }}
           animate={{ width: `${metrics.progress}%` }}
           transition={{ duration: 0.3 }}
@@ -717,55 +725,63 @@ const Training = () => {
       </div>
 
       {metrics.message && (
-        <p className="progress-message">{metrics.message}</p>
+        <p className="text-sm text-slate-600 italic">{metrics.message}</p>
       )}
     </div>
   );
 
   const renderMetricsCards = () => (
-    <div className="metrics-grid">
-      <div className="unified-metric-card">
-        <div className="metric-icon" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-          <TrendingUp size={24} />
-        </div>
-        <div className="metric-content">
-          <span className="metric-label">Train Loss</span>
-          <span className="metric-value">{metrics.trainLoss.toFixed(4)}</span>
-        </div>
-      </div>
-
-      <div className="unified-metric-card">
-        <div className="metric-icon" style={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' }}>
-          <Target size={24} />
-        </div>
-        <div className="metric-content">
-          <span className="metric-label">Val Loss</span>
-          <span className="metric-value">{metrics.valLoss.toFixed(4)}</span>
-          {metrics.bestValLoss < Infinity && (
-            <span className="metric-sub">Best: {metrics.bestValLoss.toFixed(4)}</span>
-          )}
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="bg-gradient-to-br from-violet-50 to-fuchsia-50 rounded-xl p-4 border border-violet-200/60">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
+            <TrendingUp size={18} className="text-white" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-xs text-slate-600">Train Loss</span>
+            <span className="text-lg font-bold text-slate-900">{metrics.trainLoss.toFixed(4)}</span>
+          </div>
         </div>
       </div>
 
-      <div className="unified-metric-card">
-        <div className="metric-icon" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' }}>
-          <RefreshCw size={24} />
-        </div>
-        <div className="metric-content">
-          <span className="metric-label">Epoch</span>
-          <span className="metric-value">{metrics.epoch} / {config.epochs}</span>
-          <span className="metric-sub">Step: {metrics.step}</span>
+      <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl p-4 border border-emerald-200/60">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
+            <Target size={18} className="text-white" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-xs text-slate-600">Val Loss</span>
+            <span className="text-lg font-bold text-slate-900">{metrics.valLoss.toFixed(4)}</span>
+            {metrics.bestValLoss < Infinity && (
+              <span className="text-[10px] text-slate-500">Best: {metrics.bestValLoss.toFixed(4)}</span>
+            )}
+          </div>
         </div>
       </div>
 
-      <div className="unified-metric-card">
-        <div className="metric-icon" style={{ background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)' }}>
-          <Zap size={24} />
+      <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-4 border border-blue-200/60">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+            <RefreshCw size={18} className="text-white" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-xs text-slate-600">Epoch</span>
+            <span className="text-lg font-bold text-slate-900">{metrics.epoch} / {config.epochs}</span>
+            <span className="text-[10px] text-slate-500">Step: {metrics.step}</span>
+          </div>
         </div>
-        <div className="metric-content">
-          <span className="metric-label">Throughput</span>
-          <span className="metric-value">{metrics.throughput.toFixed(1)} it/s</span>
-          <span className="metric-sub">LR: {metrics.learningRate.toExponential(2)}</span>
+      </div>
+
+      <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-4 border border-amber-200/60">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
+            <Zap size={18} className="text-white" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-xs text-slate-600">Throughput</span>
+            <span className="text-lg font-bold text-slate-900">{metrics.throughput.toFixed(1)} it/s</span>
+            <span className="text-[10px] text-slate-500">LR: {metrics.learningRate.toExponential(2)}</span>
+          </div>
         </div>
       </div>
 
@@ -798,10 +814,10 @@ const Training = () => {
   );
 
   const renderCharts = () => (
-    <div className="charts-container">
+    <div className="flex flex-col gap-6">
       {/* Loss Chart */}
-      <div className="chart-card">
-        <h3 className="chart-title">Training & Validation Loss</h3>
+      <div className="bg-slate-50 rounded-xl p-4">
+        <h3 className="text-base font-bold text-slate-900 mb-4">Training & Validation Loss</h3>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={lossHistory}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -843,8 +859,8 @@ const Training = () => {
       </div>
 
       {/* Learning Rate Chart */}
-      <div className="chart-card">
-        <h3 className="chart-title">Learning Rate Schedule</h3>
+      <div className="bg-slate-50 rounded-xl p-4">
+        <h3 className="text-base font-bold text-slate-900 mb-4">Learning Rate Schedule</h3>
         <ResponsiveContainer width="100%" height={250}>
           <AreaChart data={lrHistory}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -884,8 +900,8 @@ const Training = () => {
 
       {/* Throughput & Gradient Norm */}
       {metricsHistory.length > 0 && (
-        <div className="chart-card">
-          <h3 className="chart-title">Throughput & Gradient Norm</h3>
+        <div className="bg-slate-50 rounded-xl p-4">
+          <h3 className="text-base font-bold text-slate-900 mb-4">Throughput & Gradient Norm</h3>
           <ResponsiveContainer width="100%" height={250}>
             <ComposedChart data={metricsHistory}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -935,27 +951,36 @@ const Training = () => {
   );
 
   const renderLogs = () => (
-    <div className="logs-container">
-      <div className="logs-header">
-        <h3>Training Logs</h3>
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-bold text-slate-900">Training Logs</h3>
         <button
+          type="button"
           onClick={() => setLogs([])}
-          className="btn-ghost btn-sm"
+          className="px-3 py-1 text-sm border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
         >
           Clear
         </button>
       </div>
-      <div className="logs-content">
+      <div className="max-h-[400px] overflow-y-auto flex flex-col gap-2">
         {logs.map((log, index) => (
-          <div key={index} className={`log-entry log-${log.type}`}>
-            <span className="log-time">{log.timestamp}</span>
-            <span className="log-message">{log.message}</span>
+          <div
+            key={index}
+            className={`flex gap-3 px-4 py-2 rounded-lg text-sm border-r-4 ${
+              log.type === 'success' ? 'bg-green-50 border-green-500' :
+              log.type === 'error' ? 'bg-red-50 border-red-500' :
+              log.type === 'warning' ? 'bg-yellow-50 border-yellow-500' :
+              'bg-blue-50 border-blue-500'
+            }`}
+          >
+            <span className="text-slate-500 font-mono text-xs min-w-[80px]">{log.timestamp}</span>
+            <span className="text-slate-700 flex-1">{log.message}</span>
           </div>
         ))}
         {logs.length === 0 && (
-          <div className="logs-empty">
+          <div className="flex flex-col items-center justify-center py-12 text-slate-400">
             <Info size={40} opacity={0.3} />
-            <p>هیچ log‌ای وجود ندارد</p>
+            <p className="mt-2">هیچ log‌ای وجود ندارد</p>
           </div>
         )}
       </div>
@@ -963,13 +988,13 @@ const Training = () => {
   );
 
   const renderConfiguration = () => (
-    <div className="config-container">
+    <div className="flex flex-col gap-6">
       {/* Basic Config */}
-      <div className="config-section">
-        <h3 className="config-title">تنظیمات اصلی</h3>
-        <div className="config-grid">
-          <div className="form-group">
-            <label>Epochs</label>
+      <div className="bg-slate-50 rounded-xl p-4">
+        <h3 className="text-base font-bold text-slate-900 mb-4">تنظیمات اصلی</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium text-slate-700">Epochs</label>
             <input
               type="number"
               value={config.epochs}
@@ -977,11 +1002,12 @@ const Training = () => {
               min="1"
               max="1000"
               disabled={trainingState !== TRAINING_STATE.IDLE}
+              className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-violet-500 disabled:bg-slate-100 disabled:cursor-not-allowed"
             />
           </div>
 
-          <div className="form-group">
-            <label>Batch Size</label>
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium text-slate-700">Batch Size</label>
             <input
               type="number"
               value={config.batchSize}
@@ -989,11 +1015,12 @@ const Training = () => {
               min="1"
               max="512"
               disabled={trainingState !== TRAINING_STATE.IDLE}
+              className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-violet-500 disabled:bg-slate-100 disabled:cursor-not-allowed"
             />
           </div>
 
-          <div className="form-group">
-            <label>Learning Rate</label>
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium text-slate-700">Learning Rate</label>
             <input
               type="number"
               value={config.learningRate}
@@ -1002,15 +1029,17 @@ const Training = () => {
               min="0.00001"
               max="1"
               disabled={trainingState !== TRAINING_STATE.IDLE}
+              className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-violet-500 disabled:bg-slate-100 disabled:cursor-not-allowed"
             />
           </div>
 
-          <div className="form-group">
-            <label>Optimizer</label>
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium text-slate-700">Optimizer</label>
             <select
               value={config.optimizer}
               onChange={(e) => updateConfig('optimizer', e.target.value)}
               disabled={trainingState !== TRAINING_STATE.IDLE}
+              className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-violet-500 disabled:bg-slate-100 disabled:cursor-not-allowed"
             >
               {Object.entries(OPTIMIZER_TYPES).map(([key, value]) => (
                 <option key={value} value={value}>{key}</option>
@@ -1021,13 +1050,13 @@ const Training = () => {
       </div>
 
       {/* Advanced Config */}
-      <div className="config-section">
+      <div className="bg-slate-50 rounded-xl p-4">
         <div
-          className="config-header"
+          className="flex justify-between items-center cursor-pointer"
           onClick={() => setShowAdvancedConfig(!showAdvancedConfig)}
         >
-          <h3 className="config-title">تنظیمات پیشرفته</h3>
-          {showAdvancedConfig ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+          <h3 className="text-base font-bold text-slate-900">تنظیمات پیشرفته</h3>
+          {showAdvancedConfig ? <ChevronUp size={20} className="text-slate-600" /> : <ChevronDown size={20} className="text-slate-600" />}
         </div>
 
         <AnimatePresence>
@@ -1036,14 +1065,15 @@ const Training = () => {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="config-grid"
+              className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4"
             >
-              <div className="form-group">
-                <label>LR Scheduler</label>
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium text-slate-700">LR Scheduler</label>
                 <select
                   value={config.lrScheduler}
                   onChange={(e) => updateConfig('lrScheduler', e.target.value)}
                   disabled={trainingState !== TRAINING_STATE.IDLE}
+                  className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-violet-500 disabled:bg-slate-100 disabled:cursor-not-allowed"
                 >
                   {Object.entries(LR_SCHEDULER_TYPES).map(([key, value]) => (
                     <option key={value} value={value}>{key}</option>
@@ -1051,19 +1081,20 @@ const Training = () => {
                 </select>
               </div>
 
-              <div className="form-group">
-                <label>Warmup Steps</label>
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium text-slate-700">Warmup Steps</label>
                 <input
                   type="number"
                   value={config.warmupSteps}
                   onChange={(e) => updateConfig('warmupSteps', parseInt(e.target.value))}
                   min="0"
                   disabled={trainingState !== TRAINING_STATE.IDLE}
+                  className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-violet-500 disabled:bg-slate-100 disabled:cursor-not-allowed"
                 />
               </div>
 
-              <div className="form-group">
-                <label>Weight Decay</label>
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium text-slate-700">Weight Decay</label>
                 <input
                   type="number"
                   value={config.weightDecay}
@@ -1072,11 +1103,12 @@ const Training = () => {
                   min="0"
                   max="1"
                   disabled={trainingState !== TRAINING_STATE.IDLE}
+                  className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-violet-500 disabled:bg-slate-100 disabled:cursor-not-allowed"
                 />
               </div>
 
-              <div className="form-group">
-                <label>Gradient Accumulation Steps</label>
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium text-slate-700">Gradient Accumulation Steps</label>
                 <input
                   type="number"
                   value={config.gradientAccumulationSteps}
@@ -1084,11 +1116,12 @@ const Training = () => {
                   min="1"
                   max="128"
                   disabled={trainingState !== TRAINING_STATE.IDLE}
+                  className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-violet-500 disabled:bg-slate-100 disabled:cursor-not-allowed"
                 />
               </div>
 
-              <div className="form-group">
-                <label>Max Gradient Norm</label>
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium text-slate-700">Max Gradient Norm</label>
                 <input
                   type="number"
                   value={config.maxGradNorm}
@@ -1096,37 +1129,42 @@ const Training = () => {
                   step="0.1"
                   min="0"
                   disabled={trainingState !== TRAINING_STATE.IDLE}
+                  className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-violet-500 disabled:bg-slate-100 disabled:cursor-not-allowed"
                 />
               </div>
 
-              <div className="form-group checkbox-group">
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={config.mixedPrecision}
-                    onChange={(e) => updateConfig('mixedPrecision', e.target.checked)}
-                    disabled={trainingState !== TRAINING_STATE.IDLE}
-                  />
+              <div className="flex items-center gap-2 col-span-2">
+                <input
+                  type="checkbox"
+                  id="mixedPrecision"
+                  checked={config.mixedPrecision}
+                  onChange={(e) => updateConfig('mixedPrecision', e.target.checked)}
+                  disabled={trainingState !== TRAINING_STATE.IDLE}
+                  className="w-4 h-4 text-violet-500 border-slate-300 rounded focus:ring-violet-500 disabled:opacity-50"
+                />
+                <label htmlFor="mixedPrecision" className="text-sm font-medium text-slate-700">
                   Mixed Precision Training
                 </label>
               </div>
 
-              <div className="form-group checkbox-group">
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={config.enableEarlyStopping}
-                    onChange={(e) => updateConfig('enableEarlyStopping', e.target.checked)}
-                    disabled={trainingState !== TRAINING_STATE.IDLE}
-                  />
+              <div className="flex items-center gap-2 col-span-2">
+                <input
+                  type="checkbox"
+                  id="enableEarlyStopping"
+                  checked={config.enableEarlyStopping}
+                  onChange={(e) => updateConfig('enableEarlyStopping', e.target.checked)}
+                  disabled={trainingState !== TRAINING_STATE.IDLE}
+                  className="w-4 h-4 text-violet-500 border-slate-300 rounded focus:ring-violet-500 disabled:opacity-50"
+                />
+                <label htmlFor="enableEarlyStopping" className="text-sm font-medium text-slate-700">
                   Enable Early Stopping
                 </label>
               </div>
 
               {config.enableEarlyStopping && (
                 <>
-                  <div className="form-group">
-                    <label>Early Stopping Patience</label>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-sm font-medium text-slate-700">Early Stopping Patience</label>
                     <input
                       type="number"
                       value={config.earlyStoppingPatience}
@@ -1134,11 +1172,12 @@ const Training = () => {
                       min="1"
                       max="20"
                       disabled={trainingState !== TRAINING_STATE.IDLE}
+                      className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-violet-500 disabled:bg-slate-100 disabled:cursor-not-allowed"
                     />
                   </div>
 
-                  <div className="form-group">
-                    <label>Early Stopping Threshold</label>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-sm font-medium text-slate-700">Early Stopping Threshold</label>
                     <input
                       type="number"
                       value={config.earlyStoppingThreshold}
@@ -1146,27 +1185,30 @@ const Training = () => {
                       step="0.0001"
                       min="0"
                       disabled={trainingState !== TRAINING_STATE.IDLE}
+                      className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-violet-500 disabled:bg-slate-100 disabled:cursor-not-allowed"
                     />
                   </div>
                 </>
               )}
 
-              <div className="form-group checkbox-group">
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={config.enableDistillation}
-                    onChange={(e) => updateConfig('enableDistillation', e.target.checked)}
-                    disabled={trainingState !== TRAINING_STATE.IDLE || !selectedTeacherModel}
-                  />
+              <div className="flex items-center gap-2 col-span-2">
+                <input
+                  type="checkbox"
+                  id="enableDistillation"
+                  checked={config.enableDistillation}
+                  onChange={(e) => updateConfig('enableDistillation', e.target.checked)}
+                  disabled={trainingState !== TRAINING_STATE.IDLE || !selectedTeacherModel}
+                  className="w-4 h-4 text-violet-500 border-slate-300 rounded focus:ring-violet-500 disabled:opacity-50"
+                />
+                <label htmlFor="enableDistillation" className="text-sm font-medium text-slate-700">
                   Knowledge Distillation
                 </label>
               </div>
 
               {config.enableDistillation && (
                 <>
-                  <div className="form-group">
-                    <label>Distillation Alpha</label>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-sm font-medium text-slate-700">Distillation Alpha</label>
                     <input
                       type="number"
                       value={config.distillationAlpha}
@@ -1175,11 +1217,12 @@ const Training = () => {
                       min="0"
                       max="1"
                       disabled={trainingState !== TRAINING_STATE.IDLE}
+                      className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-violet-500 disabled:bg-slate-100 disabled:cursor-not-allowed"
                     />
                   </div>
 
-                  <div className="form-group">
-                    <label>Distillation Temperature</label>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-sm font-medium text-slate-700">Distillation Temperature</label>
                     <input
                       type="number"
                       value={config.distillationTemperature}
@@ -1188,6 +1231,7 @@ const Training = () => {
                       min="1"
                       max="10"
                       disabled={trainingState !== TRAINING_STATE.IDLE}
+                      className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-violet-500 disabled:bg-slate-100 disabled:cursor-not-allowed"
                     />
                   </div>
                 </>
@@ -1235,43 +1279,106 @@ const Training = () => {
     }
   };
 
-  const renderModelSelection = () => (
-    <div className="selection-section">
-      <h3 className="section-title">انتخاب مدل پایه</h3>
-      <div className="models-grid">
-        {models.map((model) => (
-          <div
-            key={model.id}
-            className={`model-card ${selectedBaseModel?.id === model.id ? 'selected' : ''}`}
-            onClick={() => setSelectedBaseModel(model)}
-          >
-            <div className="model-icon">
-              <Brain size={24} />
+  const renderModelSelection = () => {
+    // فیلتر مدل‌های base و teacher از لیست کلی مدل‌ها
+    const baseModels = models.filter(m => 
+      m.role === 'base' || m.type === 'base' || m.category === 'base' || 
+      (!m.role && !m.type && !m.category) // اگر role مشخص نباشد، به عنوان base در نظر بگیریم
+    );
+    const teacherModels = models.filter(m => 
+      m.role === 'teacher' || m.type === 'teacher' || m.category === 'teacher'
+    );
+
+    return (
+      <>
+        {/* Base Models */}
+        <div className="bg-white rounded-[14px] border border-slate-200/60 shadow-[0_20px_40px_-8px_rgba(15,23,42,0.07),0_2px_4px_rgba(15,23,42,0.04)] p-4 flex flex-col gap-4">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
+              <Brain size={16} className="text-white" />
             </div>
-            <h4>{model.name}</h4>
-            <p className="model-description">{model.description}</p>
-            <div className="model-tags">
-              <span className="tag">{model.type}</span>
-              <span className="tag">{model.size}</span>
-            </div>
-            <div className="model-actions">
-              <button
-                className="download-btn"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDownloadModel(model.id);
-                }}
-                title="دانلود مدل"
+            <h3 className="text-base font-bold text-slate-900">انتخاب مدل پایه</h3>
+          </div>
+          <div className="max-h-[180px] overflow-y-auto flex flex-col gap-2 pr-2">
+            {baseModels.length > 0 ? baseModels.map((model) => (
+              <label
+                key={model.id}
+                className="flex items-start justify-between text-xs text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200/60 rounded-[10px] px-3 py-2 cursor-pointer transition-colors"
               >
-                <Download size={16} />
-                دانلود
-              </button>
+                <div className="flex flex-col gap-1">
+                  <span className="font-medium text-slate-900 text-sm">{model.name}</span>
+                  <span className="text-[11px] text-slate-500 flex items-center gap-2">
+                    {model.size && <span>{model.size}</span>}
+                    {model.type && <span className="px-2 py-0.5 rounded bg-violet-100 text-violet-700">{model.type}</span>}
+                  </span>
+                </div>
+                <input
+                  type="radio"
+                  name="baseModel"
+                  value={model.id}
+                  checked={selectedBaseModel?.id === model.id}
+                  onChange={() => setSelectedBaseModel(model)}
+                  className="mt-1"
+                />
+              </label>
+            )) : (
+              <p className="text-sm text-slate-500 text-center py-4">مدل پایه‌ای در دسترس نیست</p>
+            )}
+          </div>
+        </div>
+
+        {/* Teacher Models */}
+        {teacherModels.length > 0 && (
+          <div className="bg-white rounded-[14px] border border-slate-200/60 shadow-[0_20px_40px_-8px_rgba(15,23,42,0.07),0_2px_4px_rgba(15,23,42,0.04)] p-4 flex flex-col gap-4">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
+                <Brain size={16} className="text-white" />
+              </div>
+              <h3 className="text-base font-bold text-slate-900">انتخاب مدل معلم (اختیاری)</h3>
+            </div>
+            <div className="max-h-[180px] overflow-y-auto flex flex-col gap-2 pr-2">
+              <label className="flex items-start justify-between text-xs text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200/60 rounded-[10px] px-3 py-2 cursor-pointer transition-colors">
+                <div className="flex flex-col gap-1">
+                  <span className="font-medium text-slate-900 text-sm">بدون مدل معلم</span>
+                  <span className="text-[11px] text-slate-500">آموزش بدون distillation</span>
+                </div>
+                <input
+                  type="radio"
+                  name="teacherModel"
+                  value=""
+                  checked={!selectedTeacherModel}
+                  onChange={() => setSelectedTeacherModel(null)}
+                  className="mt-1"
+                />
+              </label>
+              {teacherModels.map((model) => (
+                <label
+                  key={model.id}
+                  className="flex items-start justify-between text-xs text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200/60 rounded-[10px] px-3 py-2 cursor-pointer transition-colors"
+                >
+                  <div className="flex flex-col gap-1">
+                    <span className="font-medium text-slate-900 text-sm">{model.name}</span>
+                    <span className="text-[11px] text-slate-500 flex items-center gap-2">
+                      {model.size && <span>{model.size}</span>}
+                      {model.type && <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-700">{model.type}</span>}
+                    </span>
+                  </div>
+                  <input
+                    type="radio"
+                    name="teacherModel"
+                    value={model.id}
+                    checked={selectedTeacherModel?.id === model.id}
+                    onChange={() => setSelectedTeacherModel(model)}
+                    className="mt-1"
+                  />
+                </label>
+              ))}
             </div>
           </div>
-        ))}
-      </div>
-    </div>
-  );
+        )}
+      </>
+    );
+  };
 
   const handleDownloadDataset = async (datasetId) => {
     // Prevent multiple simultaneous downloads
@@ -1531,8 +1638,59 @@ ${metadata.details ? `\n🔢 جزئیات: ${JSON.stringify(metadata.details, nu
   };
 
   const renderDatasetSelection = () => (
+    <div className="bg-white rounded-[14px] border border-slate-200/60 shadow-[0_20px_40px_-8px_rgba(15,23,42,0.07),0_2px_4px_rgba(15,23,42,0.04)] p-4 flex flex-col gap-4">
+      <div className="flex items-center gap-2">
+        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+          <Brain size={16} className="text-white" />
+        </div>
+        <h3 className="text-base font-bold text-slate-900">انتخاب دیتاست‌ها</h3>
+      </div>
+      <div className="max-h-[180px] overflow-y-auto flex flex-col gap-2 pr-2">
+        {datasets.length > 0 ? datasets.map((dataset) => {
+          const isSelected = selectedDatasets.some(d => (typeof d === 'object' ? d.id : d) === dataset.id);
+          return (
+            <label
+              key={dataset.id}
+              className="flex items-start justify-between text-xs text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200/60 rounded-[10px] px-3 py-2 cursor-pointer transition-colors"
+            >
+              <div className="flex flex-col gap-1">
+                <span className="font-medium text-slate-900 text-sm">{dataset.name}</span>
+                <span className="text-[11px] text-slate-500 flex items-center gap-2">
+                  {dataset.size && <span>{dataset.size}</span>}
+                  {dataset.type && <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-700">{dataset.type}</span>}
+                </span>
+              </div>
+              <input
+                type="checkbox"
+                checked={isSelected}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setSelectedDatasets(prev => [...prev, dataset]);
+                  } else {
+                    setSelectedDatasets(prev => prev.filter(d => (typeof d === 'object' ? d.id : d) !== dataset.id));
+                  }
+                }}
+                className="mt-1"
+              />
+            </label>
+          );
+        }) : (
+          <p className="text-sm text-slate-500 text-center py-4">دیتاستی در دسترس نیست</p>
+        )}
+      </div>
+      {datasets.length > 0 && (
+        <div className="pt-2 border-t border-slate-200">
+          <p className="text-xs text-slate-600">
+            {selectedDatasets.length} دیتاست انتخاب شده
+          </p>
+        </div>
+      )}
+    </div>
+  );
+
+  const renderDatasetSelectionOld = () => (
     <div className="selection-section">
-      <h3 className="section-title">انتخاب دیتاست‌ها</h3>
+      <h3 className="section-title">انتخاب دیتاست‌ها (قدیمی)</h3>
       <div className="datasets-grid">
         {datasets.map((dataset) => {
           const isSelected = selectedDatasets.some(d => d.id === dataset.id);
@@ -1560,6 +1718,7 @@ ${metadata.details ? `\n🔢 جزئیات: ${JSON.stringify(metadata.details, nu
                   {/* Regular Download Button */}
                   <div className="relative flex-1">
                     <button
+                      type="button"
                       className={`download-btn ${downloadingDatasets.has(dataset.id) ? 'downloading' : ''}`}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -1644,107 +1803,140 @@ ${metadata.details ? `\n🔢 جزئیات: ${JSON.stringify(metadata.details, nu
   // ===== MAIN RENDER =====
   if (loading) {
     return (
-      <div className="training-container loading">
-        <Loader className="spinner" size={48} />
-        <p>در حال بارگذاری...</p>
+      <div className="w-full flex flex-col items-stretch bg-[#F5F7FB] text-slate-900 rtl pb-24 min-h-screen">
+        <div className="w-full max-w-[1400px] mx-auto px-4 flex flex-col items-center justify-center min-h-screen gap-4">
+          <Loader className="animate-spin text-violet-500" size={48} />
+          <p className="text-slate-600">در حال بارگذاری...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="training-container">
-      {/* Monitoring Strip - نمایش وضعیت در بالای صفحه */}
-      {trainingState !== TRAINING_STATE.IDLE && <MonitoringStrip />}
+    <div className="w-full flex flex-col items-stretch bg-[#F5F7FB] text-slate-900 rtl pb-24">
+      <div className="w-full max-w-[1400px] mx-auto px-4 flex flex-col gap-6">
+        {/* Monitoring Strip - نمایش وضعیت در بالای صفحه */}
+        {trainingState !== TRAINING_STATE.IDLE && <MonitoringStrip />}
 
-      {/* Header */}
-      <div className="training-header">
-        <div className="header-content">
-          <div className="header-title">
-            <Brain size={32} />
+        {/* Header */}
+        <div className="bg-white rounded-[14px] border border-slate-200/60 shadow-[0_20px_40px_-8px_rgba(15,23,42,0.07),0_2px_4px_rgba(15,23,42,0.04)] p-6 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
+              <Brain size={24} className="text-white" />
+            </div>
             <div>
-              <h1>آموزش مدل</h1>
-              <p>سیستم آموزش پیشرفته با الگوریتم‌های مدرن</p>
+              <h1 className="text-2xl font-bold text-slate-900">آموزش مدل</h1>
+              <p className="text-sm text-slate-600">سیستم آموزش پیشرفته با الگوریتم‌های مدرن</p>
             </div>
           </div>
 
-          <div className="header-status">
-            <div className={`status-badge status-${trainingState}`}>
+          <div className="flex items-center gap-3">
+            <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${
+              trainingState === TRAINING_STATE.IDLE ? 'bg-slate-100 text-slate-700' :
+              trainingState === TRAINING_STATE.TRAINING ? 'bg-blue-100 text-blue-700' :
+              trainingState === TRAINING_STATE.PAUSED ? 'bg-yellow-100 text-yellow-700' :
+              trainingState === TRAINING_STATE.COMPLETED ? 'bg-green-100 text-green-700' :
+              'bg-red-100 text-red-700'
+            }`}>
               {trainingState === TRAINING_STATE.IDLE && <CheckCircle size={16} />}
               {trainingState === TRAINING_STATE.TRAINING && <Loader className="spinner-sm" size={16} />}
               {trainingState === TRAINING_STATE.PAUSED && <Pause size={16} />}
               {trainingState === TRAINING_STATE.COMPLETED && <Award size={16} />}
               {trainingState === TRAINING_STATE.FAILED && <AlertTriangle size={16} />}
-              <span>{trainingState.toUpperCase()}</span>
+              <span>{trainingState === 'idle' ? 'آماده' : trainingState === 'training' ? 'در حال آموزش' : trainingState === 'paused' ? 'متوقف' : trainingState === 'completed' ? 'کامل شده' : 'خطا'}</span>
             </div>
           </div>
         </div>
+
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Sidebar - Model & Dataset Selection */}
+          <div className="lg:col-span-1 flex flex-col gap-6">
+            {renderModelSelection()}
+            {renderDatasetSelection()}
+          </div>
+
+          {/* Main Panel */}
+          <div className="lg:col-span-2 flex flex-col gap-6">
+            {/* Controls */}
+            <div className="bg-white rounded-[14px] border border-slate-200/60 shadow-[0_20px_40px_-8px_rgba(15,23,42,0.07),0_2px_4px_rgba(15,23,42,0.04)] p-6">
+              {renderTrainingControls()}
+            </div>
+
+            {/* Progress (when training) */}
+            {trainingState !== TRAINING_STATE.IDLE && (
+              <div className="bg-white rounded-[14px] border border-slate-200/60 shadow-[0_20px_40px_-8px_rgba(15,23,42,0.07),0_2px_4px_rgba(15,23,42,0.04)] p-6">
+                {renderProgressBar()}
+              </div>
+            )}
+
+            {/* Metrics Cards */}
+            {trainingState !== TRAINING_STATE.IDLE && (
+              <div className="bg-white rounded-[14px] border border-slate-200/60 shadow-[0_20px_40px_-8px_rgba(15,23,42,0.07),0_2px_4px_rgba(15,23,42,0.04)] p-6">
+                {renderMetricsCards()}
+              </div>
+            )}
+
+            {/* Tabs */}
+            <div className="bg-white rounded-[14px] border border-slate-200/60 shadow-[0_20px_40px_-8px_rgba(15,23,42,0.07),0_2px_4px_rgba(15,23,42,0.04)] p-6">
+              <div className="flex gap-2 border-b border-slate-200 mb-6">
+                <button
+                  type="button"
+                  className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
+                    activeTab === 'metrics'
+                      ? 'border-violet-500 text-violet-700 bg-violet-50'
+                      : 'border-transparent text-slate-600 hover:text-slate-900'
+                  }`}
+                  onClick={() => setActiveTab('metrics')}
+                >
+                  <BarChart3 size={16} />
+                  نمودارها
+                </button>
+                <button
+                  type="button"
+                  className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
+                    activeTab === 'config'
+                      ? 'border-violet-500 text-violet-700 bg-violet-50'
+                      : 'border-transparent text-slate-600 hover:text-slate-900'
+                  }`}
+                  onClick={() => setActiveTab('config')}
+                >
+                  <Settings size={16} />
+                  تنظیمات
+                </button>
+                <button
+                  type="button"
+                  className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
+                    activeTab === 'logs'
+                      ? 'border-violet-500 text-violet-700 bg-violet-50'
+                      : 'border-transparent text-slate-600 hover:text-slate-900'
+                  }`}
+                  onClick={() => setActiveTab('logs')}
+                >
+                  <Activity size={16} />
+                  Logs
+                </button>
+              </div>
+
+              <div>
+                {activeTab === 'metrics' && renderCharts()}
+                {activeTab === 'config' && renderConfiguration()}
+                {activeTab === 'logs' && renderLogs()}
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
+    </div>
+  );
+};
 
-      {/* Main Content */}
-      <div className="training-content">
-        {/* Sidebar - Model & Dataset Selection */}
-        <div className="training-sidebar">
-          {renderModelSelection()}
-          {renderDatasetSelection()}
-        </div>
+export default Training;
 
-        {/* Main Panel */}
-        <div className="training-main">
-          {/* Controls */}
-          <div className="training-panel">
-            {renderTrainingControls()}
-          </div>
-
-          {/* Progress (when training) */}
-          {trainingState !== TRAINING_STATE.IDLE && (
-            <div className="training-panel">
-              {renderProgressBar()}
-            </div>
-          )}
-
-          {/* Metrics Cards */}
-          {trainingState !== TRAINING_STATE.IDLE && (
-            <div className="training-panel">
-              {renderMetricsCards()}
-            </div>
-          )}
-
-          {/* Tabs */}
-          <div className="training-panel">
-            <div className="tabs">
-              <button
-                className={`tab ${activeTab === 'metrics' ? 'active' : ''}`}
-                onClick={() => setActiveTab('metrics')}
-              >
-                <BarChart3 size={16} />
-                نمودارها
-              </button>
-              <button
-                className={`tab ${activeTab === 'config' ? 'active' : ''}`}
-                onClick={() => setActiveTab('config')}
-              >
-                <Settings size={16} />
-                تنظیمات
-              </button>
-              <button
-                className={`tab ${activeTab === 'logs' ? 'active' : ''}`}
-                onClick={() => setActiveTab('logs')}
-              >
-                <Activity size={16} />
-                Logs
-              </button>
-            </div>
-
-            <div className="tab-content">
-              {activeTab === 'metrics' && renderCharts()}
-              {activeTab === 'config' && renderConfiguration()}
-              {activeTab === 'logs' && renderLogs()}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Inline Styles */}
+/* REMOVED INLINE STYLES - NOW USING TAILWIND CSS */
+/* OLD CSS BELOW (COMMENTED OUT FOR REFERENCE) */
+/*
       <style>{`
         .training-container {
           min-height: 100vh;
@@ -2539,8 +2731,4 @@ ${metadata.details ? `\n🔢 جزئیات: ${JSON.stringify(metadata.details, nu
           }
         }
       `}</style>
-    </div>
-  );
-};
-
-export default Training;
+*/
