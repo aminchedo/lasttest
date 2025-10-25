@@ -1,0 +1,53 @@
+{
+  "cpu": {
+    "model": "11th Gen Intel(R) Core(TM) i5-1135G7 @ 2.40GHz",
+    "cores": 4,
+    "speed": 2419,
+    "architecture": "x64"
+  },
+  "memory": {
+    "total": 17014120448,
+    "free": 7478185984,
+    "used": 9535934464,
+    "percentage": 56
+  },
+  "gpu": {
+    "available": false,
+    "type": "unknown",
+    "memory": 0,
+    "compute": "cpu-only",
+    "driver": "unknown"
+  },
+  "storage": {
+    "type": "local",
+    "available": true,
+    "speed": "standard",
+    "path": "C:\\Users\\Dreammaker\\Desktop\\HAJI\\farsi-model-trainer"
+  },
+  "platform": {
+    "os": "win32",
+    "arch": "x64",
+    "nodeVersion": "v20.19.5",
+    "uptime": 268234.875
+  },
+  "performance": {
+    "cpuScore": 5842,
+    "memoryScore": 16,
+    "overallScore": 3512
+  },
+  "recommendations": [
+    {
+      "type": "memory",
+      "level": "warning",
+      "message": "حافظه سیستم برای مدل‌های بزرگ کافی نیست",
+      "suggestion": "محدود کردن اندازه مدل یا batch size"
+    },
+    {
+      "type": "gpu",
+      "level": "info",
+      "message": "GPU در دسترس نیست - آموزش بر روی CPU انجام می‌شود",
+      "suggestion": "برای سرعت بیشتر، استفاده از GPU توصیه می‌شود"
+    }
+  ],
+  "timestamp": "2025-10-25T02:49:42.009Z"
+}

@@ -1,0 +1,27 @@
+{
+  "models": [
+    {
+      "id": "model:sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+      "name": "paraphrase-multilingual-MiniLM-L12-v2",
+      "repo": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+      "path": "C:\\Users\\Dreammaker\\Desktop\\HAJI\\farsi-model-trainer\\server\\storage\\models\\sentence-transformers\\paraphrase-multilingual-MiniLM-L12-v2\\README.md",
+      "downloaded": true
+    },
+    {
+      "id": "model:FacebookAI/xlm-roberta-base",
+      "name": "xlm-roberta-base",
+      "repo": "FacebookAI/xlm-roberta-base",
+      "path": "C:\\Users\\Dreammaker\\Desktop\\HAJI\\farsi-model-trainer\\server\\storage\\models\\FacebookAI\\xlm-roberta-base\\README.md",
+      "downloaded": true
+    }
+  ],
+  "datasets": [
+    {
+      "id": "dataset:huggingface/aweme:README.md",
+      "name": "Test Dataset",
+      "repo": "huggingface/aweme",
+      "path": "C:\\Users\\Dreammaker\\Desktop\\HAJI\\farsi-model-trainer\\server\\storage\\datasets\\huggingface\\aweme\\README.md",
+      "downloaded": true
+    }
+  ]
+}

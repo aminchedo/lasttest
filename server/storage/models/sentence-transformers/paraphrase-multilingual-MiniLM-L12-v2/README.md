@@ -1,0 +1,1 @@
+Temporary Redirect. Redirecting to /api/resolve-cache/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/86741b4e3f5cb7765a600d3a3d55a0f6a6cb443d/README.md?%2Fsentence-transformers%2Fparaphrase-multilingual-MiniLM-L12-v2%2Fresolve%2Fmain%2FREADME.md=&etag=%226bedb7f3622d56b7020f33ab93f6996d33242043%22

@@ -1,0 +1,216 @@
+// Enhanced API Client - کاملاً هماهنگ با بک‌اند واقعی
+import io from 'socket.io-client';
+import axios from 'axios';
+
+const API_BASE = import.meta.env.VITE_API_BASE || '/api';
+const WS_BASE = import.meta.env.VITE_WS_BASE || '';
+
+class APIClient {
+  constructor() {
+    this.socket = null;
+    this.axios = axios.create({
+      baseURL: API_BASE,
+      timeout: 30000,
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8'
+      }
+    });
+
+    // Request interceptor
+    this.axios.interceptors.request.use(
+      config => {
+        const token = localStorage.getItem('authToken');
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+      },
+      error => Promise.reject(error)
+    );
+
+    // Response interceptor
+    this.axios.interceptors.response.use(
+      response => response.data,
+      error => {
+        if (error.response?.status === 401) {
+          localStorage.removeItem('authToken');
+          window.location.href = '/login';
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    this.initSocket();
+  }
+
+  initSocket() {
+    // Socket.IO فقط در صورت فعال بودن متغیر محیطی
+    const wsEnabled = import.meta.env.VITE_WS === 'true';
+    
+    if (!wsEnabled) {
+      console.log('WebSocket disabled - using HTTP API only');
+      return;
+    }
+
+    try {
+      this.socket = io(WS_BASE, {
+        transports: ['websocket'],
+        reconnectionAttempts: 3,
+        timeout: 2000
+      });
+      
+      this.socket.on('connect', () => {
+        console.log('WebSocket connected');
+      });
+      
+      this.socket.on('connect_error', (error) => {
+        console.log('WebSocket connection failed:', error.message);
+        this.socket.close();
+      });
+      
+    } catch (error) {
+      console.log('WebSocket initialization failed:', error.message);
+    }
+  }
+
+  // Health & Status
+  async checkHealth() {
+    return this.axios.get('/health');
+  }
+
+  async getSystemStatus() {
+    return this.axios.get('/system/status');
+  }
+
+  // Dashboard
+  async getDashboardStats() {
+    return this.axios.get('/dashboard/stats');
+  }
+
+  async getRecentActivities(limit = 20) {
+    return this.axios.get('/activities/recent', { params: { limit } });
+  }
+
+  async getSystemMetrics() {
+    return this.axios.get('/metrics');
+  }
+
+  // Settings - از routes/settings.js
+  async getSettings() {
+    return this.axios.get('/settings');
+  }
+
+  async saveSettings(settings) {
+    return this.axios.post('/settings', settings);
+  }
+
+  // Catalog - از routes/catalog.js
+  async getCatalog() {
+    return this.axios.get('/catalog');
+  }
+
+  async getCatalogModels() {
+    return this.axios.get('/catalog/models');
+  }
+
+  async getCatalogDatasets() {
+    return this.axios.get('/catalog/datasets');
+  }
+
+  // Training - از routes/training.js
+  async getTrainingAssets() {
+    return this.axios.get('/training/assets');
+  }
+
+  async startTraining(config) {
+    return this.axios.post('/training/start', config);
+  }
+
+  async stopTraining(jobId) {
+    return this.axios.post(`/training/stop/${jobId}`);
+  }
+
+  async resumeTraining(jobId) {
+    return this.axios.post(`/training/resume/${jobId}`);
+  }
+
+  async getTrainingStatus(jobId) {
+    return this.axios.get(`/training/status/${jobId}`);
+  }
+
+  async saveModel(jobId, modelName) {
+    return this.axios.post(`/training/save/${jobId}`, { modelName });
+  }
+
+  async loadModel(modelPath) {
+    return this.axios.post('/training/load', { modelPath });
+  }
+
+  // Download - از routes/download.js
+  async startDownload(items) {
+    return this.axios.post('/download/start', { items });
+  }
+
+  async getDownloadStatus(jobId) {
+    return this.axios.get(`/download/status/${jobId}`);
+  }
+
+  async getCatalogForDownload() {
+    return this.axios.get('/download/catalog');
+  }
+
+  // Scan - از routes/scan.js
+  async scanDirectory(path) {
+    return this.axios.post('/scan', { root: path });
+  }
+
+  async scanComplete(path, options = {}) {
+    return this.axios.post('/scan/scan-complete', { root: path, ...options });
+  }
+
+  async getDirectoryStats(path) {
+    return this.axios.get(`/scan/stats/${encodeURIComponent(path)}`);
+  }
+
+  // Models
+  async getModels() {
+    return this.axios.get('/models');
+  }
+
+  async downloadModels(modelIds) {
+    return this.axios.post('/models/download', { modelIds });
+  }
+
+  // Datasets (می‌توانیم از assets استفاده کنیم)
+  async getDatasets() {
+    const assets = await this.getTrainingAssets();
+    return assets.filter(a => a.kind === 'dataset');
+  }
+
+  // User
+  async getUserProfile() {
+    return this.axios.get('/user/profile');
+  }
+
+  // WebSocket Events - Disabled
+  subscribeToTraining(jobId, callback) {
+    console.log('WebSocket disabled - training events not available');
+    return () => { };
+  }
+
+  subscribeToDownload(jobId, callback) {
+    console.log('WebSocket disabled - download events not available');
+    return () => { };
+  }
+
+  subscribeToMetrics(callback) {
+    console.log('WebSocket disabled - metrics events not available');
+    return () => { };
+  }
+
+  disconnect() {
+    console.log('WebSocket disabled - no connection to disconnect');
+  }
+}
+
+export default new APIClient();

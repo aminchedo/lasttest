@@ -1,0 +1,38 @@
+[
+  {
+    "type": "tts",
+    "model_id": "Kamtera/persian-tts-female-glow_tts",
+    "description": "مدل فارسی تک‌گوینده زن با Glow-TTS",
+    "links": [
+      {
+        "file": "config.json",
+        "url": "https://huggingface.co/Kamtera/persian-tts-female-glow_tts/resolve/main/config.json",
+        "notes": "فایل کانفیگ مدل"
+      },
+      {
+        "file": "best_model.pth",
+        "url": "https://huggingface.co/Kamtera/persian-tts-female-glow_tts/resolve/main/best_model.pth",
+        "notes": "وزن مدل"
+      }
+    ],
+    "page": "https://huggingface.co/Kamtera/persian-tts-female-glow_tts"
+  },
+  {
+    "type": "tts",
+    "model_id": "facebook/mms-tts-fas",
+    "description": "مدل فارسی TTS از پروژه MMS (Meta AI)",
+    "links": [
+      {
+        "file": "vocab.json",
+        "url": "https://huggingface.co/facebook/mms-tts-fas/resolve/main/vocab.json",
+        "notes": "واژگان مدل"
+      },
+      {
+        "file": "config.json",
+        "url": "https://huggingface.co/facebook/mms-tts-fas/resolve/main/config.json",
+        "notes": "کانفیگ مدل"
+      }
+    ],
+    "page": "https://huggingface.co/facebook/mms-tts-fas"
+  }
+]

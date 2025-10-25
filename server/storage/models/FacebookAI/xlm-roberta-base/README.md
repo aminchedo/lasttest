@@ -1,0 +1,1 @@
+Temporary Redirect. Redirecting to /api/resolve-cache/models/FacebookAI/xlm-roberta-base/e73636d4f797dec63c3081bb6ed5c7b0bb3f2089/README.md?%2FFacebookAI%2Fxlm-roberta-base%2Fresolve%2Fmain%2FREADME.md=&etag=%22512a9832c9065dcb5f323b1c3b0fade85d399769%22
