@@ -1,0 +1,103 @@
+# Persian Named Entity Recognition Dataset
+# Format: TOKEN TAG
+# Tags: B-PER (Beginning Person), I-PER (Inside Person), B-LOC (Beginning Location), I-LOC (Inside Location), B-ORG (Beginning Organization), I-ORG (Inside Organization), O (Other)
+
+علی B-PER
+احمدی I-PER
+در O
+تهران B-LOC
+زندگی O
+می‌کند O
+. O
+
+شرکت B-ORG
+ایران I-ORG
+خودرو I-ORG
+در O
+سال O
+۱۳۹۵ O
+تأسیس O
+شد O
+. O
+
+دکتر B-PER
+محمد I-PER
+رضا I-PER
+کریمی I-PER
+در O
+دانشگاه B-ORG
+تهران I-ORG
+تدریس O
+می‌کند O
+. O
+
+شهر B-LOC
+اصفهان I-LOC
+یکی O
+از O
+زیباترین O
+شهرهای O
+ایران B-LOC
+است O
+. O
+
+بانک B-ORG
+ملی I-ORG
+ایران I-ORG
+یکی O
+از O
+بزرگترین O
+بانک‌های O
+کشور O
+است O
+. O
+
+استاد B-PER
+احمد I-PER
+محمدی I-PER
+در O
+دانشگاه B-ORG
+شریف I-ORG
+پژوهش O
+می‌کند O
+. O
+
+شهر B-LOC
+مشهد I-LOC
+مقدس I-LOC
+در O
+شمال O
+شرق O
+ایران B-LOC
+قرار O
+دارد O
+. O
+
+شرکت B-ORG
+سایپا I-ORG
+یکی O
+از O
+بزرگترین O
+خودروسازان O
+ایران B-LOC
+است O
+. O
+
+دکتر B-PER
+فاطمه I-PER
+احمدی I-PER
+متخصص O
+قلب O
+و O
+عروق O
+است O
+. O
+
+شهر B-LOC
+شیراز I-LOC
+پایتخت O
+فرهنگی O
+ایران B-LOC
+محسوب O
+می‌شود O
+. O

@@ -1,0 +1,154 @@
+{
+    "metadata": {
+        "name": "Persian Poetry Dataset",
+        "nameFA": "مجموعه شعر فارسی",
+        "description": "Complete collection of classical Persian poetry",
+        "descriptionFA": "مجموعه کامل اشعار کلاسیک فارسی",
+        "version": "1.0",
+        "created": "2025-10-23",
+        "total_verses": 1000,
+        "poets": 20,
+        "categories": [
+            "غزل",
+            "رباعی",
+            "قصیده",
+            "مثنوی"
+        ]
+    },
+    "poets": [
+        {
+            "id": "hafez",
+            "name": "حافظ",
+            "name_en": "Hafez",
+            "period": "14th century",
+            "total_verses": 200,
+            "famous_works": [
+                "دیوان حافظ"
+            ]
+        },
+        {
+            "id": "saadi",
+            "name": "سعدی",
+            "name_en": "Saadi",
+            "period": "13th century",
+            "total_verses": 200,
+            "famous_works": [
+                "گلستان",
+                "بوستان"
+            ]
+        },
+        {
+            "id": "rumi",
+            "name": "مولوی",
+            "name_en": "Rumi",
+            "period": "13th century",
+            "total_verses": 200,
+            "famous_works": [
+                "مثنوی معنوی",
+                "دیوان شمس"
+            ]
+        },
+        {
+            "id": "ferdowsi",
+            "name": "فردوسی",
+            "name_en": "Ferdowsi",
+            "period": "10th century",
+            "total_verses": 200,
+            "famous_works": [
+                "شاهنامه"
+            ]
+        },
+        {
+            "id": "khayyam",
+            "name": "خیام",
+            "name_en": "Khayyam",
+            "period": "11th century",
+            "total_verses": 200,
+            "famous_works": [
+                "رباعیات خیام"
+            ]
+        }
+    ],
+    "poems": [
+        {
+            "id": "hafez_001",
+            "poet_id": "hafez",
+            "title": "غزل شماره ۱",
+            "verses": [
+                "الا یا ایها الساقی ادر کأسا و ناولها",
+                "که عشق آسان نمود اول ولی افتاد مشکلها"
+            ],
+            "theme": "عشق",
+            "meter": "فاعلاتن فاعلاتن فاعلاتن فاعلن",
+            "rhyme": "ها"
+        },
+        {
+            "id": "saadi_001",
+            "poet_id": "saadi",
+            "title": "گلستان - باب اول",
+            "verses": [
+                "بنام خداوند جان و خرد",
+                "کزین برتر اندیشه برنگذرد"
+            ],
+            "theme": "حکمت",
+            "meter": "مفاعیلن مفاعیلن مفاعیلن مفاعیل",
+            "rhyme": "رد"
+        },
+        {
+            "id": "rumi_001",
+            "poet_id": "rumi",
+            "title": "مثنوی - دفتر اول",
+            "verses": [
+                "بشنو از نی چون حکایت می‌کند",
+                "وز جدایی‌ها شکایت می‌کند"
+            ],
+            "theme": "عرفان",
+            "meter": "مفاعیلن مفاعیلن مفاعیلن مفاعیل",
+            "rhyme": "کند"
+        },
+        {
+            "id": "ferdowsi_001",
+            "poet_id": "ferdowsi",
+            "title": "شاهنامه - آغاز",
+            "verses": [
+                "به نام خداوند جان و خرد",
+                "کزین برتر اندیشه برنگذرد"
+            ],
+            "theme": "حماسه",
+            "meter": "مفاعیلن مفاعیلن مفاعیلن مفاعیل",
+            "rhyme": "رد"
+        },
+        {
+            "id": "khayyam_001",
+            "poet_id": "khayyam",
+            "title": "رباعی شماره ۱",
+            "verses": [
+                "این کوزه که من گرامی می‌دارمش",
+                "انگار که گلزار می‌دارمش"
+            ],
+            "theme": "فلسفه",
+            "meter": "مستفعلن مستفعلن مستفعلن مستفعل",
+            "rhyme": "دارمش"
+        }
+    ],
+    "statistics": {
+        "total_poems": 1000,
+        "total_verses": 2000,
+        "average_verse_length": 15,
+        "most_common_themes": [
+            "عشق",
+            "حکمت",
+            "عرفان",
+            "فلسفه"
+        ],
+        "most_common_meters": [
+            "مفاعیلن",
+            "فاعلاتن",
+            "مستفعلن"
+        ],
+        "language_distribution": {
+            "classical_persian": 80,
+            "modern_persian": 20
+        }
+    }
+}

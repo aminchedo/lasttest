@@ -1,0 +1,21 @@
+text,label,sentiment_score,category,source
+"این فیلم واقعاً عالی بود و من از دیدنش لذت بردم",positive,0.9,entertainment,movie_review
+"خدمات این رستوران افتضاح بود و اصلاً راضی نیستم",negative,-0.8,food,restaurant_review
+"محصول خوبی بود ولی قیمتش کمی گران است",neutral,0.1,shopping,product_review
+"برنامه‌ریزی سفر به مشهد عالی بود و خیلی خوش گذشت",positive,0.85,travel,trip_review
+"کیفیت این کالا متوسط است و انتظار بیشتری داشتم",neutral,-0.2,shopping,product_review
+"مطالب این وبلاگ خیلی مفید و آموزنده است",positive,0.75,education,blog_review
+"سرویس مشتریان این شرکت بسیار ضعیف است",negative,-0.7,service,customer_feedback
+"قیمت‌های این فروشگاه مناسب و منطقی است",positive,0.6,shopping,price_review
+"محیط کار در این شرکت خیلی استرس‌زا است",negative,-0.6,work,employee_feedback
+"کتاب بسیار جالب و خواندنی بود",positive,0.8,education,book_review
+"سرعت اینترنت در این منطقه خیلی کند است",negative,-0.5,technology,service_review
+"طراحی این اپلیکیشن کاربرپسند و زیبا است",positive,0.7,technology,app_review
+"قیمت بنزین این روزها واقعاً گران شده",negative,-0.4,economy,price_comment
+"آموزش‌های این دوره خیلی مفید و کاربردی بود",positive,0.8,education,course_review
+"خدمات بانکی این شعبه سریع و دقیق است",positive,0.6,finance,bank_review
+"ترافیک شهر امروز خیلی سنگین بود",negative,-0.3,transportation,traffic_comment
+"غذای این رستوران خوشمزه و باکیفیت است",positive,0.85,food,restaurant_review
+"قیمت مسکن در این منطقه خیلی بالا است",negative,-0.7,real_estate,price_comment
+"برنامه‌های تلویزیونی این شبکه متنوع و جذاب است",positive,0.7,entertainment,tv_review
+"خدمات پستی این بار خیلی کند و نامنظم است",negative,-0.6,service,postal_review
