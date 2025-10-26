@@ -87,6 +87,7 @@ function Models({ activeSubTab = 'models', setActiveSubTab = () => {} }) {
   // Job tracking
   const [activeJobs, setActiveJobs] = useState(new Map());
   const pollIntervals = useRef(new Map());
+  const eventSources = useRef(new Map());
 
   // Statistics
   const [stats, setStats] = useState({
@@ -121,6 +122,21 @@ function Models({ activeSubTab = 'models', setActiveSubTab = () => {} }) {
   useEffect(() => {
     updateStats();
   }, [models]);
+
+  // Cleanup EventSources on unmount
+  useEffect(() => {
+    return () => {
+      eventSources.current.forEach((eventSource) => {
+        eventSource.close();
+      });
+      eventSources.current.clear();
+      
+      pollIntervals.current.forEach((intervalId) => {
+        clearInterval(intervalId);
+      });
+      pollIntervals.current.clear();
+    };
+  }, []);
 
   // ===================================
   // DATA LOADING FUNCTIONS
@@ -401,15 +417,33 @@ function Models({ activeSubTab = 'models', setActiveSubTab = () => {} }) {
         );
       });
 
-      const result = await apiClient.startHfDownload(modelId, 'models/base');
+      // Start download via new API
+      const response = await fetch('/api/models/download/start', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ modelId })
+      });
+
+      const result = await response.json();
 
       if (result && result.ok) {
-        const jobId = result.jobId;
-        setActiveJobs(prev => new Map(prev.set(modelId, jobId)));
-        startProgressPolling(modelId, jobId);
-        toast.success(`دانلود ${model.name} شروع شد`);
+        if (result.started) {
+          startSSEProgress(modelId);
+          toast.success(`دانلود ${model.name} شروع شد`);
+        } else {
+          // Already downloaded
+          setModels(prev => {
+            const prevArray = Array.isArray(prev) ? prev : [];
+            return prevArray.map(m =>
+              m.id === modelId ? { ...m, status: 'ready' } : m
+            );
+          });
+          toast.success(`مدل ${model.name} قبلاً دانلود شده است`);
+        }
       } else {
-        throw new Error('Download request failed');
+        throw new Error(result.message || 'Download request failed');
       }
     } catch (error) {
       console.error('Error downloading model:', error);
@@ -422,6 +456,47 @@ function Models({ activeSubTab = 'models', setActiveSubTab = () => {} }) {
         );
       });
     }
+  };
+
+  const startSSEProgress = (modelId) => {
+    // Close existing EventSource if any
+    if (eventSources.current.has(modelId)) {
+      eventSources.current.get(modelId).close();
+    }
+
+    const eventSource = new EventSource(`/api/models/download/progress?modelId=${encodeURIComponent(modelId)}`);
+    eventSources.current.set(modelId, eventSource);
+
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        console.log('SSE Progress:', data);
+
+        setDownloadProgress(prev => ({
+          ...prev,
+          [modelId]: data.progress || 0
+        }));
+
+        if (data.status === 'done') {
+          handleDownloadComplete(modelId);
+          eventSource.close();
+          eventSources.current.delete(modelId);
+        } else if (data.status === 'error') {
+          handleDownloadFailed(modelId, data.error || 'Download failed');
+          eventSource.close();
+          eventSources.current.delete(modelId);
+        }
+      } catch (error) {
+        console.error('Error parsing SSE data:', error);
+      }
+    };
+
+    eventSource.onerror = (error) => {
+      console.error('SSE Error:', error);
+      handleDownloadFailed(modelId, 'Connection error');
+      eventSource.close();
+      eventSources.current.delete(modelId);
+    };
   };
 
   const startProgressPolling = (modelId, jobId) => {
@@ -456,9 +531,16 @@ function Models({ activeSubTab = 'models', setActiveSubTab = () => {} }) {
   };
 
   const handleDownloadComplete = (modelId, jobId) => {
+    // Clean up polling if exists
     if (pollIntervals.current.has(modelId)) {
       clearInterval(pollIntervals.current.get(modelId));
       pollIntervals.current.delete(modelId);
+    }
+
+    // Clean up EventSource if exists
+    if (eventSources.current.has(modelId)) {
+      eventSources.current.get(modelId).close();
+      eventSources.current.delete(modelId);
     }
 
     setModels(prev => {
@@ -486,10 +568,17 @@ function Models({ activeSubTab = 'models', setActiveSubTab = () => {} }) {
     }
   };
 
-  const handleDownloadFailed = (modelId, jobId, errorMessage) => {
+  const handleDownloadFailed = (modelId, errorMessage) => {
+    // Clean up polling if exists
     if (pollIntervals.current.has(modelId)) {
       clearInterval(pollIntervals.current.get(modelId));
       pollIntervals.current.delete(modelId);
+    }
+
+    // Clean up EventSource if exists
+    if (eventSources.current.has(modelId)) {
+      eventSources.current.get(modelId).close();
+      eventSources.current.delete(modelId);
     }
 
     setModels(prev => {

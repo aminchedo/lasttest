@@ -42,16 +42,30 @@ loadCatalogs().catch(console.error);
 // Active download sessions (in-memory for simplicity)
 const downloadSessions = new Map();
 
+// Rate limiting: track active downloads per IP
+const activeDownloads = new Map();
+
 // POST /api/models/download/start - Start model download
 router.post('/start', async (req, res) => {
   try {
     const { modelId } = req.body;
+    const clientIP = req.ip || req.connection.remoteAddress || 'unknown';
 
     if (!modelId) {
       return res.status(400).json({
         ok: false,
         error: 'MODEL_ID_REQUIRED',
         message: 'modelId parameter is required'
+      });
+    }
+
+    // Rate limiting: only one active download per IP
+    if (activeDownloads.has(clientIP)) {
+      console.warn('[DOWNLOAD] Rate limited request from IP:', clientIP);
+      return res.status(429).json({
+        ok: false,
+        error: 'rate_limited',
+        message: 'Only one active download allowed at a time'
       });
     }
 
@@ -64,9 +78,8 @@ router.post('/start', async (req, res) => {
       console.warn('[DOWNLOAD] Blocked request for unknown modelId:', modelId);
       return res.status(400).json({
         ok: false,
-        error: 'MODEL_NOT_ALLOWED',
-        message: 'Requested model is not in approved catalog.',
-        allowedModels: ALLOWED_MODELS.map(m => m.id)
+        error: 'invalid_model',
+        message: 'Model ID not permitted'
       });
     }
 
@@ -101,9 +114,18 @@ router.post('/start', async (req, res) => {
       );
     }
 
+    // Track active download for rate limiting
+    activeDownloads.set(clientIP, {
+      modelId,
+      assetId,
+      startTime: new Date().toISOString()
+    });
+
     // Start download simulation (replace with real HF download logic)
-    simulateDownload(assetId, modelId, modelMeta).catch(err => {
+    simulateDownload(assetId, modelId, modelMeta, clientIP).catch(err => {
       console.error('[DOWNLOAD] Error in download:', err);
+      // Clean up rate limiting on error
+      activeDownloads.delete(clientIP);
     });
 
     res.json({
@@ -157,7 +179,8 @@ router.get('/progress', async (req, res) => {
   }
 
   const sessionId = uuidv4();
-  downloadSessions.set(sessionId, { res, modelId, assetId: asset.id });
+  const clientIP = req.ip || req.connection.remoteAddress || 'unknown';
+  downloadSessions.set(sessionId, { res, modelId, assetId: asset.id, clientIP });
 
   // Send initial state
   res.write(`data: ${JSON.stringify({
@@ -179,6 +202,7 @@ router.get('/progress', async (req, res) => {
     })}\n\n`);
     res.end();
     downloadSessions.delete(sessionId);
+    activeDownloads.delete(clientIP);
     return;
   }
 
@@ -192,6 +216,7 @@ router.get('/progress', async (req, res) => {
     })}\n\n`);
     res.end();
     downloadSessions.delete(sessionId);
+    activeDownloads.delete(clientIP);
     return;
   }
 
@@ -225,12 +250,14 @@ router.get('/progress', async (req, res) => {
         clearInterval(pollInterval);
         res.end();
         downloadSessions.delete(sessionId);
+        activeDownloads.delete(clientIP);
       }
     } catch (err) {
       console.error('[SSE] Poll error:', err);
       clearInterval(pollInterval);
       res.end();
       downloadSessions.delete(sessionId);
+      activeDownloads.delete(clientIP);
     }
   }, 500);
 
@@ -238,15 +265,43 @@ router.get('/progress', async (req, res) => {
   req.on('close', () => {
     clearInterval(pollInterval);
     downloadSessions.delete(sessionId);
+    activeDownloads.delete(clientIP);
+  });
+
+  // Cleanup on response close
+  res.on('close', () => {
+    clearInterval(pollInterval);
+    downloadSessions.delete(sessionId);
+    activeDownloads.delete(clientIP);
   });
 });
 
 // Simulate download (replace with real HuggingFace download)
-async function simulateDownload(assetId, modelId, modelMeta) {
+async function simulateDownload(assetId, modelId, modelMeta, clientIP) {
   try {
     const totalBytes = modelMeta.sizeBytes || 418000000;
     const chunkSize = Math.floor(totalBytes / 50); // 50 updates
     let downloadedBytes = 0;
+
+    // Check disk space before starting (simplified check)
+    try {
+      const fs = await import('fs/promises');
+      const stats = await fs.statfs('/tmp'); // Check available space
+      const availableBytes = stats.bavail * stats.bsize;
+      if (availableBytes < totalBytes * 1.1) { // Need 10% buffer
+        throw new Error('ENOSPC: No space left on device');
+      }
+    } catch (spaceError) {
+      if (spaceError.code === 'ENOSPC' || spaceError.message.includes('ENOSPC')) {
+        console.error(`❌ Insufficient disk space for ${modelId}:`, spaceError.message);
+        await runAsync(
+          'UPDATE assets SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+          ['failed', assetId]
+        );
+        activeDownloads.delete(clientIP);
+        return;
+      }
+    }
 
     for (let i = 0; i < 50; i++) {
       await new Promise(resolve => setTimeout(resolve, 100)); // Simulate network delay
@@ -254,10 +309,17 @@ async function simulateDownload(assetId, modelId, modelMeta) {
       downloadedBytes += chunkSize;
       const progress = Math.min(100, Math.round((downloadedBytes / totalBytes) * 100));
 
-      await runAsync(
-        'UPDATE assets SET bytes_done = ?, progress = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-        [downloadedBytes, progress, assetId]
-      );
+      try {
+        await runAsync(
+          'UPDATE assets SET bytes_done = ?, progress = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+          [downloadedBytes, progress, assetId]
+        );
+      } catch (dbError) {
+        if (dbError.message.includes('ENOSPC') || dbError.code === 'ENOSPC') {
+          throw new Error('ENOSPC: No space left on device');
+        }
+        throw dbError;
+      }
 
       // Random failure simulation (1% chance)
       if (Math.random() < 0.01 && i > 10) {
@@ -274,10 +336,22 @@ async function simulateDownload(assetId, modelId, modelMeta) {
     console.log(`✅ Download completed: ${modelId}`);
   } catch (error) {
     console.error(`❌ Download failed for ${modelId}:`, error);
+    
+    let errorStatus = 'failed';
+    let errorMessage = error.message;
+    
+    if (error.message.includes('ENOSPC') || error.code === 'ENOSPC') {
+      errorStatus = 'error';
+      errorMessage = 'No space left on device';
+    }
+    
     await runAsync(
       'UPDATE assets SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-      ['failed', assetId]
+      [errorStatus, assetId]
     );
+  } finally {
+    // Always clean up rate limiting
+    activeDownloads.delete(clientIP);
   }
 }
 

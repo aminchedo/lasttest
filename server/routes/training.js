@@ -6,6 +6,9 @@ import path from 'path';
 
 const router = express.Router();
 
+// Multi-run isolation: Track active runs by runId
+const activeRuns = new Map();
+
 // Get all training jobs
 router.get('/jobs', async (req, res) => {
   try {
@@ -296,9 +299,27 @@ router.get('/status/:id', async (req, res) => {
       [req.params.id]
     );
 
+    // Get real-time metrics from activeRuns if available
+    let realTimeMetrics = null;
+    if (run && activeRuns.has(run.id)) {
+      const runState = activeRuns.get(run.id);
+      realTimeMetrics = {
+        epoch: runState.currentEpoch,
+        trainLoss: runState.lastMetrics.trainLoss,
+        valLoss: runState.lastMetrics.valLoss,
+        learningRate: runState.lastMetrics.learningRate,
+        throughput: runState.lastMetrics.throughput,
+        bestCheckpoint: run.best_ckpt,
+        lastCheckpoint: run.last_ckpt,
+        status: runState.status,
+        startTime: runState.startTime,
+        endTime: runState.endTime
+      };
+    }
+
     res.status(200).json({
       ...job,
-      metrics: run ? {
+      metrics: realTimeMetrics || (run ? {
         epoch: run.epoch,
         trainLoss: run.train_loss,
         valLoss: run.val_loss,
@@ -306,12 +327,25 @@ router.get('/status/:id', async (req, res) => {
         throughput: run.throughput,
         bestCheckpoint: run.best_ckpt,
         lastCheckpoint: run.last_ckpt
-      } : null
+      } : null)
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
+
+// Helper function to log training events
+async function logTrainingEvent(runId, level, message, details = '') {
+  try {
+    await runAsync(
+      `INSERT INTO training_logs (run_id, level, message, details, timestamp)
+       VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)`,
+      [runId, level, message, details]
+    );
+  } catch (error) {
+    console.error('Error logging training event:', error);
+  }
+}
 
 // شبیه‌سازی آموزش با متریکس و Checkpoints
 async function simulateTraining(jobId, runId, baseModel, datasets, teacherModel, config = {}, isResume = false) {
@@ -328,6 +362,22 @@ async function simulateTraining(jobId, runId, baseModel, datasets, teacherModel,
     const maxPatience = 3;
 
     const startEpoch = isResume ? await getRunEpoch(runId) : 0;
+
+    // Log training start
+    await logTrainingEvent(runId, 'info', 'Training started', `Base model: ${baseModel}, Datasets: ${datasets.join(', ')}`);
+
+    // Initialize run state in activeRuns map
+    activeRuns.set(runId, {
+      status: 'running',
+      jobId,
+      baseModel,
+      datasets,
+      teacherModel,
+      currentEpoch: startEpoch,
+      totalEpochs: epochs,
+      lastMetrics: {},
+      startTime: new Date().toISOString()
+    });
 
     for (let epoch = startEpoch; epoch < epochs; epoch++) {
       const baseDecay = 0.25;
@@ -364,6 +414,24 @@ async function simulateTraining(jobId, runId, baseModel, datasets, teacherModel,
         [epoch + 1, trainLoss.toFixed(3), valLoss.toFixed(3), lr.toFixed(6), throughput, bestCheckpoint, lastCheckpoint, runId]
       );
 
+      // Update activeRuns map with current metrics
+      if (activeRuns.has(runId)) {
+        const runState = activeRuns.get(runId);
+        runState.currentEpoch = epoch + 1;
+        runState.lastMetrics = {
+          trainLoss: parseFloat(trainLoss.toFixed(3)),
+          valLoss: parseFloat(valLoss.toFixed(3)),
+          accuracy: parseFloat(calculateAccuracy(valLoss)),
+          throughput: parseFloat(throughput),
+          learningRate: parseFloat(lr.toFixed(6))
+        };
+        activeRuns.set(runId, runState);
+      }
+
+      // Log epoch completion
+      await logTrainingEvent(runId, 'info', `Epoch ${epoch + 1} completed`, 
+        `Train Loss: ${trainLoss.toFixed(3)}, Val Loss: ${valLoss.toFixed(3)}, LR: ${lr.toFixed(6)}`);
+
       for (let step = 0; step < stepsPerEpoch; step++) {
         await new Promise(resolve => setTimeout(resolve, stepDuration));
         const progress = Math.round(((epoch * stepsPerEpoch + step) / (epochs * stepsPerEpoch)) * 100);
@@ -399,12 +467,46 @@ async function simulateTraining(jobId, runId, baseModel, datasets, teacherModel,
       ['completed', `Training completed (Best Val Loss: ${bestValLoss.toFixed(3)})`, jobId]
     );
 
+    // Update run status in activeRuns
+    if (activeRuns.has(runId)) {
+      const runState = activeRuns.get(runId);
+      runState.status = 'completed';
+      runState.endTime = new Date().toISOString();
+      activeRuns.set(runId, runState);
+    }
+
+    // Log training completion
+    await logTrainingEvent(runId, 'success', 'Training completed successfully', 
+      `Best Val Loss: ${bestValLoss.toFixed(3)}, Best Checkpoint: ${bestCheckpoint}`);
+
+    // Clean up from activeRuns after a delay
+    setTimeout(() => {
+      activeRuns.delete(runId);
+    }, 30000); // Keep for 30 seconds after completion
+
   } catch (error) {
     console.error('Error in simulateTraining:', error);
     await runAsync(
       'UPDATE jobs SET status = ?, message = ? WHERE id = ?',
       ['failed', error.message, jobId]
     );
+
+    // Update run status in activeRuns
+    if (activeRuns.has(runId)) {
+      const runState = activeRuns.get(runId);
+      runState.status = 'failed';
+      runState.endTime = new Date().toISOString();
+      runState.error = error.message;
+      activeRuns.set(runId, runState);
+    }
+
+    // Log training failure
+    await logTrainingEvent(runId, 'error', 'Training failed', error.message);
+
+    // Clean up from activeRuns after a delay
+    setTimeout(() => {
+      activeRuns.delete(runId);
+    }, 30000); // Keep for 30 seconds after failure
   }
 }
 
@@ -412,6 +514,16 @@ async function simulateTraining(jobId, runId, baseModel, datasets, teacherModel,
 async function getRunEpoch(runId) {
   const run = await getAsync('SELECT epoch FROM runs WHERE id = ?', [runId]);
   return run?.epoch || 0;
+}
+
+// Helper to calculate accuracy from val_loss (rough estimate)
+function calculateAccuracy(valLoss) {
+  if (!valLoss) return 0;
+  const loss = parseFloat(valLoss);
+  // Rough conversion: lower loss = higher accuracy
+  // Assuming loss range 0-3, accuracy range 60-95%
+  const accuracy = Math.max(60, Math.min(95, 95 - (loss * 10)));
+  return accuracy.toFixed(2);
 }
 
 export default router;
