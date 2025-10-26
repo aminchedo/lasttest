@@ -87,7 +87,7 @@ function Navigation({ currentPage, onPageChange }) {
     },
     {
       id: 'exports',
-      label: 'خروجی‌ها',
+      label: 'منابع موجود',
       icon: FileText,
       category: 'tools',
       badge: menuCounts.exports > 0 ? String(menuCounts.exports) : null
