@@ -43,10 +43,13 @@ router.get('/', async (req, res) => {
             localPath: dataset.local_path
         }));
 
-        res.json(formattedDatasets);
-    } catch (error) {
-        console.error('Error fetching datasets:', error);
-        res.status(500).json({ error: 'خطا در دریافت دیتاست‌ها' });
+        res.json({
+            ok: true,
+            data: formatt        console.error('Error fetching datasets:', error);
+        res.status(500).json({
+            ok: false,
+            error: 'خطا در دریافت دیتاست‌ها'
+        });500).json({ error: 'خطا در دریافت دیتاست‌ها' });
     }
 });
 

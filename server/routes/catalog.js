@@ -36,13 +36,19 @@ router.get('/models', async (req, res) => {
         const dbModelIds = new Set(dbModels.map(m => m.model_id));
         const catalogOnlyModels = catalogModels.filter(cm => !dbModelIds.has(cm.id));
 
-        res.json([...dbModelMap, ...catalogOnlyModels]);
+        res.json({
+            ok: true,
+            data: [...dbModelMap, ...catalogOnlyModels]
+        });
     } catch (error) {
         console.error('خطا در دریافت مدل‌ها:', error);
         // در صورت خطا، مدل‌های پیش‌فرض را برگردان
         try {
             const defaultModels = await getDefaultModels();
-            res.json(defaultModels);
+            res.json({
+                ok: true,
+                data: defaultModels
+            });
         } catch (fallbackError) {
             res.status(500).json({ error: 'خطا در دریافت مدل‌ها' });
         }
@@ -82,13 +88,19 @@ router.get('/datasets', async (req, res) => {
         const dbDatasetIds = new Set(dbDatasets.map(d => d.model_id));
         const catalogOnlyDatasets = catalogDatasets.filter(cd => !dbDatasetIds.has(cd.id));
 
-        res.json([...dbDatasetMap, ...catalogOnlyDatasets]);
+        res.json({
+            ok: true,
+            data: [...dbDatasetMap, ...catalogOnlyDatasets]
+        });
     } catch (error) {
         console.error('خطا در دریافت دیتاست‌ها:', error);
         // در صورت خطا، دیتاست‌های پیش‌فرض را برگردان
         try {
             const defaultDatasets = await getDefaultDatasets();
-            res.json(defaultDatasets);
+            res.json({
+                ok: true,
+                data: defaultDatasets
+            });
         } catch (fallbackError) {
             res.status(500).json({ error: 'خطا در دریافت دیتاست‌ها' });
         }

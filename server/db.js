@@ -30,6 +30,7 @@ export async function initializeDatabase() {
         datasets: [],
         jobs: [],
         runs: [],
+        training_metrics: [],
         download_queue: [],
         cached_models: [],
         api_requests: []
