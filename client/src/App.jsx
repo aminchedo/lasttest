@@ -287,7 +287,7 @@ const getPageTitle = (page) => {
     models: 'مدل‌ها',
     training: 'آموزش',
     analysis: 'آنالیز و گزارش‌گیری',
-    exports: 'خروجی‌ها',
+    exports: 'منابع موجود',
     users: 'کاربران',
     kitchen: 'آشپزخانه مدل‌سازی',
     settings: 'تنظیمات',
