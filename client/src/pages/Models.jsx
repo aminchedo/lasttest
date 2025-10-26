@@ -626,202 +626,194 @@ function Models({ activeSubTab = 'models', setActiveSubTab = () => {} }) {
   // ===================================
 
   return (
-    <div className="container-12 models-page-wrapper">
+    <div className="w-full flex flex-col items-stretch bg-[#F5F7FB] text-slate-900 rtl pb-24">
+      <div className="w-full max-w-[1400px] mx-auto px-4 flex flex-col gap-6">
       {activeTab === 'models' ? (
         <>
-          {/* Stats and Controls */}
-          <div className="models-header-modern">
-            <div className="models-stats-container">
-              {/* Metrics Dashboard */}
-              <div className="metrics-dashboard">
-                <div className="unified-metric-card">
-                  <div className="unified-metric-card__top">
-                    <div className="unified-metric-card__growth unified-metric-card__growth--no-growth">
-                      <span className="growth-value">0%</span>
-                    </div>
-                    <div className="unified-metric-card__icon model-icon">
-                      <Package size={24} />
-                    </div>
-                  </div>
-
-                  <div className="unified-metric-card__value">
-                    <span className="unified-metric-card__value-primary">{stats.total}</span>
-                  </div>
-
-                  <div className="unified-metric-card__content">
-                    <h3 className="unified-metric-card__title">کل مدل‌ها</h3>
-                    <p className="unified-metric-card__subtitle">تعداد کل مدل‌های موجود</p>
-                  </div>
-                </div>
-
-                <div className="unified-metric-card">
-                  <div className="unified-metric-card__top">
-                    <div className="unified-metric-card__growth">
-                      <span className="growth-value">8%+</span>
-                      <svg className="growth-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
-                        <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    </div>
-                    <div className="unified-metric-card__icon success-icon">
-                      <CheckCircle size={24} />
-                    </div>
-                  </div>
-
-                  <div className="unified-metric-card__value">
-                    <span className="unified-metric-card__value-primary">{stats.ready}</span>
-                  </div>
-
-                  <div className="unified-metric-card__content">
-                    <h3 className="unified-metric-card__title">آماده استفاده</h3>
-                    <p className="unified-metric-card__subtitle">مدل‌های آماده برای استفاده</p>
-                  </div>
-                </div>
-
-                <div className="unified-metric-card">
-                  <div className="unified-metric-card__top">
-                    <div className="unified-metric-card__growth">
-                      <span className="growth-value">5%+</span>
-                      <svg className="growth-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
-                        <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    </div>
-                    <div className="unified-metric-card__icon processing-icon">
-                      <Download size={24} />
-                    </div>
-                  </div>
-
-                  <div className="unified-metric-card__value">
-                    <span className="unified-metric-card__value-primary">{stats.downloading}</span>
-                  </div>
-
-                  <div className="unified-metric-card__content">
-                    <h3 className="unified-metric-card__title">در حال دانلود</h3>
-                    <p className="unified-metric-card__subtitle">مدل‌های در حال دانلود</p>
-                  </div>
-                </div>
-
-                <div className="unified-metric-card">
-                  <div className="unified-metric-card__top">
-                    <div className="unified-metric-card__growth unified-metric-card__growth--no-growth">
-                      <span>0%</span>
-                    </div>
-                    <div className="unified-metric-card__icon error-icon">
-                      <AlertCircle size={24} />
-                    </div>
-                  </div>
-
-                  <div className="unified-metric-card__value">
-                    <span className="unified-metric-card__value-primary">{stats.error}</span>
-                  </div>
-
-                  <div className="unified-metric-card__content">
-                    <h3 className="unified-metric-card__title">خطا</h3>
-                    <p className="unified-metric-card__subtitle">مدل‌های با خطا</p>
-                  </div>
-                </div>
+          {/* KPI Cards Grid */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {/* Total Models */}
+            <div className="bg-white rounded-[14px] border border-slate-200/60 shadow-[0_20px_40px_-8px_rgba(15,23,42,0.07),0_2px_4px_rgba(15,23,42,0.04)] p-4 flex flex-col gap-2 min-w-[140px]">
+              <div className="flex items-center justify-between text-xs text-slate-500">
+                <span className="font-medium flex items-center gap-1">
+                  <span className="text-[11px] text-slate-500">∞</span>
+                  <span>کل مدل‌ها</span>
+                </span>
+                <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-300/40">
+                  همه
+                </span>
               </div>
+              <div className="text-slate-900 text-2xl font-semibold leading-none">
+                {stats.total}
+              </div>
+            </div>
 
-              {/* Controls Bar */}
-              <div className="controls-bar-modern">
-                {/* Search Section */}
-                <div className="harmony-search-section">
-                  <div className="harmony-search-box">
-                    <Search size={18} />
-                    <input
-                      type="text"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      placeholder="جستجوی مدل..."
-                      className="harmony-search-input"
-                    />
-                    {searchTerm && (
-                      <button
-                        onClick={() => setSearchTerm('')}
-                        className="harmony-btn harmony-btn-secondary"
-                        style={{ padding: '4px' }}
-                      >
-                        <XCircle size={16} />
-                      </button>
-                    )}
-                  </div>
-                </div>
+            {/* Ready Models */}
+            <div className="bg-white rounded-[14px] border border-slate-200/60 shadow-[0_20px_40px_-8px_rgba(15,23,42,0.07),0_2px_4px_rgba(15,23,42,0.04)] p-4 flex flex-col gap-2 min-w-[140px]">
+              <div className="flex items-center justify-between text-xs text-slate-500">
+                <span className="font-medium flex items-center gap-1">
+                  <span className="text-emerald-500 text-[11px]">✓</span>
+                  <span>آماده</span>
+                </span>
+                <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/60">
+                  بارگذاری شده
+                </span>
+              </div>
+              <div className="text-slate-900 text-2xl font-semibold leading-none">
+                {stats.ready}
+              </div>
+            </div>
 
-                {/* Filters */}
-                <div className="filters-modern">
-                  <div className="filter-label">
-                    <Filter size={16} />
-                    <span>نوع مدل:</span>
-                  </div>
-                  <div className="filter-options">
-                    <button
-                      className={`filter-btn ${filterType === 'all' ? 'active' : ''}`}
-                      onClick={() => setFilterType('all')}
-                    >
-                      همه
-                    </button>
-                    <button
-                      className={`filter-btn ${filterType === 'text' ? 'active' : ''}`}
-                      onClick={() => setFilterType('text')}
-                    >
-                      متنی
-                    </button>
-                    <button
-                      className={`filter-btn ${filterType === 'vision' ? 'active' : ''}`}
-                      onClick={() => setFilterType('vision')}
-                    >
-                      بینایی
-                    </button>
-                    <button
-                      className={`filter-btn ${filterType === 'audio' ? 'active' : ''}`}
-                      onClick={() => setFilterType('audio')}
-                    >
-                      صوتی
-                    </button>
-                  </div>
-                </div>
+            {/* Downloading Models */}
+            <div className="bg-white rounded-[14px] border border-slate-200/60 shadow-[0_20px_40px_-8px_rgba(15,23,42,0.07),0_2px_4px_rgba(15,23,42,0.04)] p-4 flex flex-col gap-2 min-w-[140px]">
+              <div className="flex items-center justify-between text-xs text-slate-500">
+                <span className="font-medium flex items-center gap-1">
+                  <span className="text-violet-500 text-[11px]">↓</span>
+                  <span>در حال دانلود</span>
+                </span>
+                <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-violet-50 text-violet-700 border border-violet-200/60">
+                  فعال
+                </span>
+              </div>
+              <div className="text-slate-900 text-2xl font-semibold leading-none">
+                {stats.downloading}
+              </div>
+            </div>
 
-                {/* Actions */}
-                <div className="actions-modern">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleRefresh}
-                    className="refresh-btn-modern"
-                    disabled={refreshing}
-                  >
-                    <motion.div
-                      animate={refreshing ? { rotate: 360 } : { rotate: 0 }}
-                      transition={{ duration: 1, repeat: refreshing ? Infinity : 0, ease: 'linear' }}
-                    >
-                      <RefreshCw size={18} />
-                    </motion.div>
-                    <span className="btn-text-small">
-                      {refreshing ? 'در حال بروزرسانی...' : 'بروزرسانی'}
-                    </span>
-                  </motion.button>
-
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleBulkDownload}
-                    className={`download-btn-modern ${downloading ? 'downloading' : ''}`}
-                    disabled={downloading || selectedModels.length === 0}
-                  >
-                    <Download size={18} />
-                    <span className="btn-text-small">
-                      {downloading ? 'در حال دانلود...' : 'دانلود انتخاب شده'}
-                    </span>
-                    {selectedModels.length > 0 && (
-                      <span className="download-count-modern">{selectedModels.length}</span>
-                    )}
-                  </motion.button>
-                </div>
+            {/* Failed Models */}
+            <div className="bg-white rounded-[14px] border border-slate-200/60 shadow-[0_20px_40px_-8px_rgba(15,23,42,0.07),0_2px_4px_rgba(15,23,42,0.04)] p-4 flex flex-col gap-2 min-w-[140px]">
+              <div className="flex items-center justify-between text-xs text-slate-500">
+                <span className="font-medium flex items-center gap-1">
+                  <span className="text-red-500 text-[11px]">✕</span>
+                  <span>خطا</span>
+                </span>
+                <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200/60">
+                  ناموفق
+                </span>
+              </div>
+              <div className="text-slate-900 text-2xl font-semibold leading-none">
+                {stats.error}
               </div>
             </div>
           </div>
 
-          {/* Models Grid */}
-          <div className="models-grid-modern full-width-grid">
+          {/* Models Section */}
+          <div className="bg-white rounded-[14px] border border-slate-200/60 shadow-[0_20px_40px_-8px_rgba(15,23,42,0.07),0_2px_4px_rgba(15,23,42,0.04)] p-4 flex flex-col gap-4">
+            {/* Section Header */}
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-bold text-slate-900">مدل‌های موجود</h3>
+              <span className="flex items-center gap-1 bg-emerald-50 text-emerald-600 border border-emerald-200/60 rounded-full px-2 py-0.5 text-[10px] font-medium">
+                <span className="text-[8px]">●</span>
+                <span>اتصال فعال</span>
+              </span>
+            </div>
+
+            {/* Controls Bar */}
+            <div className="controls-bar-modern">
+              {/* Search Section */}
+              <div className="harmony-search-section">
+                <div className="harmony-search-box">
+                  <Search size={18} />
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="جستجوی مدل..."
+                    className="harmony-search-input"
+                  />
+                  {searchTerm && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchTerm('')}
+                      className="harmony-btn harmony-btn-secondary"
+                      style={{ padding: '4px' }}
+                    >
+                      <XCircle size={16} />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Filters */}
+              <div className="filters-modern">
+                <div className="filter-label">
+                  <Filter size={16} />
+                  <span>نوع مدل:</span>
+                </div>
+                <div className="filter-options">
+                  <button
+                    type="button"
+                    className={`filter-btn ${filterType === 'all' ? 'active' : ''}`}
+                    onClick={() => setFilterType('all')}
+                  >
+                    همه
+                  </button>
+                  <button
+                    type="button"
+                    className={`filter-btn ${filterType === 'text' ? 'active' : ''}`}
+                    onClick={() => setFilterType('text')}
+                  >
+                    متنی
+                  </button>
+                  <button
+                    type="button"
+                    className={`filter-btn ${filterType === 'vision' ? 'active' : ''}`}
+                    onClick={() => setFilterType('vision')}
+                  >
+                    بینایی
+                  </button>
+                  <button
+                    type="button"
+                    className={`filter-btn ${filterType === 'audio' ? 'active' : ''}`}
+                    onClick={() => setFilterType('audio')}
+                  >
+                    صوتی
+                  </button>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="actions-modern">
+                <motion.button
+                  type="button"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleRefresh}
+                  className="refresh-btn-modern"
+                  disabled={refreshing}
+                >
+                  <motion.div
+                    animate={refreshing ? { rotate: 360 } : { rotate: 0 }}
+                    transition={{ duration: 1, repeat: refreshing ? Infinity : 0, ease: 'linear' }}
+                  >
+                    <RefreshCw size={18} />
+                  </motion.div>
+                  <span className="btn-text-small">
+                    {refreshing ? 'در حال بروزرسانی...' : 'بروزرسانی'}
+                  </span>
+                </motion.button>
+
+                <motion.button
+                  type="button"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleBulkDownload}
+                  className={`download-btn-modern ${downloading ? 'downloading' : ''}`}
+                  disabled={downloading || selectedModels.length === 0}
+                >
+                  <Download size={18} />
+                  <span className="btn-text-small">
+                    {downloading ? 'در حال دانلود...' : 'دانلود انتخاب شده'}
+                  </span>
+                  {selectedModels.length > 0 && (
+                    <span className="download-count-modern">{selectedModels.length}</span>
+                  )}
+                </motion.button>
+              </div>
+            </div>
+
+            {/* Models Grid */}
+            <div className="models-grid-modern full-width-grid">
             <AnimatePresence>
               {getPaginatedModels().map((model, index) => (
                 <motion.div
@@ -859,6 +851,7 @@ function Models({ activeSubTab = 'models', setActiveSubTab = () => {} }) {
                     <div className="unified-model-card__actions">
                       {model.status === 'available' && (
                         <motion.button
+                          type="button"
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
                           onClick={() => handleSingleDownload(model.id)}
@@ -939,6 +932,7 @@ function Models({ activeSubTab = 'models', setActiveSubTab = () => {} }) {
                 <p>هیچ مدلی یافت نشد</p>
                 {searchTerm && (
                   <button
+                    type="button"
                     onClick={() => setSearchTerm('')}
                     className="clear-search-btn"
                   >
@@ -947,6 +941,7 @@ function Models({ activeSubTab = 'models', setActiveSubTab = () => {} }) {
                 )}
               </div>
             )}
+          </div>
           </div>
 
           {/* Pagination */}
@@ -967,6 +962,7 @@ function Models({ activeSubTab = 'models', setActiveSubTab = () => {} }) {
                 </div>
                 <div className="harmony-pagination-controls">
                   <motion.button
+                    type="button"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handlePageChange(currentPage - 1)}
@@ -990,6 +986,7 @@ function Models({ activeSubTab = 'models', setActiveSubTab = () => {} }) {
                             <span style={{ padding: '0 8px', color: 'var(--gray-400)' }}>...</span>
                           )}
                           <motion.button
+                            type="button"
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => handlePageChange(page)}
@@ -1002,6 +999,7 @@ function Models({ activeSubTab = 'models', setActiveSubTab = () => {} }) {
                     })}
 
                   <motion.button
+                    type="button"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handlePageChange(currentPage + 1)}
@@ -1037,6 +1035,7 @@ function Models({ activeSubTab = 'models', setActiveSubTab = () => {} }) {
                   />
                 </label>
                 <button
+                  type="button"
                   onClick={loadAssets}
                   className="refresh-btn"
                   disabled={loading}
@@ -1101,6 +1100,7 @@ function Models({ activeSubTab = 'models', setActiveSubTab = () => {} }) {
                     <div className="asset-actions">
                       {asset.type === 'file' && (
                         <button
+                          type="button"
                           onClick={() => downloadAsset(asset.id, asset.name)}
                           className="action-btn download"
                           title="دانلود"
@@ -1109,6 +1109,7 @@ function Models({ activeSubTab = 'models', setActiveSubTab = () => {} }) {
                         </button>
                       )}
                       <button
+                        type="button"
                         onClick={() => deleteAsset(asset.id)}
                         className="action-btn delete"
                         title="حذف"
@@ -1152,6 +1153,7 @@ function Models({ activeSubTab = 'models', setActiveSubTab = () => {} }) {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
