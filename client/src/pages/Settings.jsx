@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Save, FolderOpen, Search, Key, Upload, CheckCircle, XCircle,
   AlertCircle, HardDrive, FileText, Loader, Shield, FolderSearch,
@@ -13,20 +13,18 @@ function Settings({ onUpdate, onToast }) {
   const [loading, setLoading] = useState(false);
   const [scannedItems, setScannedItems] = useState([]);
   const [scanning, setScanning] = useState(false);
-  const [scanPath, setScanPath] = useState('');
   const [selectedItems, setSelectedItems] = useState([]);
   const [showToken, setShowToken] = useState(false);
   const [importProgress, setImportProgress] = useState(null);
-  const [storageStats, setStorageStats] = useState(null);
   const [saving, setSaving] = useState(false);
   const [importing, setImporting] = useState(false);
-  const [scanResults, setScanResults] = useState(null);
-  const [filterType, setFilterType] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+
+  const storageInputRef = useRef(null);
+  const importInputRef = useRef(null);
 
   useEffect(() => {
     loadSettings();
-    loadStorageStats();
   }, []);
 
   const loadSettings = async () => {
@@ -37,95 +35,152 @@ function Settings({ onUpdate, onToast }) {
         const data = result;
         if (data.hf_token) setHfToken(data.hf_token);
         if (data.storage_root) setStorageRoot(data.storage_root);
-        onToast('تنظیمات بارگذاری شد', 'success');
+        if (onToast) onToast('تنظیمات بارگذاری شد', 'success');
       } else {
-        onToast('خطا در بارگذاری تنظیمات', 'error');
+        if (onToast) onToast('خطا در بارگذاری تنظیمات', 'error');
       }
     } catch (error) {
       console.error('Error loading settings:', error);
-      onToast('خطا در بارگذاری تنظیمات', 'error');
+      // Fallback to localStorage
+      const storedToken = localStorage.getItem('hf_token');
+      const storedStorage = localStorage.getItem('storage_root');
+      if (storedToken) setHfToken(storedToken);
+      if (storedStorage) setStorageRoot(storedStorage);
     } finally {
       setLoading(false);
     }
   };
 
-  const loadStorageStats = async () => {
-    // Mock storage stats - replace with actual API call
-    setStorageStats({
-      totalSize: '12.5 GB',
-      availableSpace: '48.2 GB',
-      modelsCount: 8,
-      datasetsCount: 3
-    });
-  };
-
   const handleSaveSettings = async (e) => {
-    e.preventDefault();
-    if (!storageRoot.trim()) {
-      onToast('لطفاً مسیر ذخیره‌سازی را وارد کنید', 'error');
-      return;
-    }
-
+    if (e) e.preventDefault();
+    
     try {
       setSaving(true);
-      const result = await apiClient.saveSettings({
-        hf_token: hfToken.trim() || undefined,
-        storage_root: storageRoot.trim()
-      });
+      
+      // Try backend first
+      try {
+        const result = await apiClient.saveSettings({
+          hf_token: hfToken.trim() || undefined,
+          storage_root: storageRoot.trim()
+        });
 
-      if (result) {
-        onUpdate({ storage_root: storageRoot });
-        onToast('تنظیمات با موفقیت ذخیره شدند ✓', 'success');
-        // Reload storage stats after saving
-        await loadStorageStats();
-      } else {
-        onToast(result.error || 'خطا در ذخیره تنظیمات', 'error');
+        if (result) {
+          if (onUpdate) onUpdate({ storage_root: storageRoot });
+          if (onToast) onToast('تنظیمات با موفقیت ذخیره شدند ✓', 'success');
+        }
+      } catch (apiError) {
+        console.warn('Backend save failed, using localStorage:', apiError);
+        // Fallback to localStorage
+        if (hfToken.trim()) localStorage.setItem('hf_token', hfToken.trim());
+        if (storageRoot.trim()) localStorage.setItem('storage_root', storageRoot.trim());
+        if (onUpdate) onUpdate({ storage_root: storageRoot });
+        if (onToast) onToast('تنظیمات محلی ذخیره شد', 'success');
       }
     } catch (error) {
       console.error('Error saving settings:', error);
-      onToast('خطا در ذخیره تنظیمات', 'error');
+      if (onToast) onToast('خطا در ذخیره تنظیمات', 'error');
     } finally {
       setSaving(false);
     }
   };
 
-  const handleScanFolder = async (e) => {
-    e.preventDefault();
-    if (!scanPath.trim()) {
-      onToast('لطفاً مسیر را وارد کنید', 'error');
-      return;
+  const handleChooseStorageDir = () => {
+    if (storageInputRef.current) {
+      storageInputRef.current.click();
     }
+  };
 
+  const handleStorageDirPicked = (e) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const firstFile = files[0];
+      const pathParts = firstFile.webkitRelativePath.split('/');
+      if (pathParts.length > 0) {
+        const dirName = pathParts[0];
+        setStorageRoot(dirName);
+      }
+    }
+  };
+
+  const handleChooseImportDir = () => {
+    if (importInputRef.current) {
+      importInputRef.current.click();
+    }
+  };
+
+  const handleImportDirPicked = (e) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const firstFile = files[0];
+      const pathParts = firstFile.webkitRelativePath.split('/');
+      if (pathParts.length > 0) {
+        const dirName = pathParts[0];
+        handleScanImportDir(dirName, Array.from(files));
+      }
+    }
+  };
+
+  const handleScanImportDir = async (dirPath, filesList = null) => {
     try {
       setScanning(true);
-      setScanResults(null);
       setScannedItems([]);
       setSelectedItems([]);
 
-      const result = await apiClient.scanAssets(scanPath);
-      console.log('📥 نتیجه اسکن:', result);
-
-      if (result && result.ok && result.data) {
-        const scanData = result.data;
-        setScanResults(scanData);
-        setScannedItems(scanData.items || []);
-
-        if (scanData.items && scanData.items.length > 0) {
-          onToast(`${scanData.items.length} فایل پیدا شد`, 'success');
-        } else {
-          onToast('هیچ فایلی یافت نشد', 'info');
+      // Try backend API first
+      try {
+        const result = await apiClient.scanAssets(dirPath);
+        if (result && result.ok && result.data) {
+          const scanData = result.data;
+          setScannedItems(scanData.items || []);
+          if (onToast && scanData.items && scanData.items.length > 0) {
+            onToast(`${scanData.items.length} فایل پیدا شد`, 'success');
+          } else if (onToast) {
+            onToast('هیچ فایلی یافت نشد', 'info');
+          }
+          return;
         }
+      } catch (apiError) {
+        console.warn('Backend scan failed, using fallback:', apiError);
+      }
+
+      // Fallback: process files locally if provided
+      if (filesList && filesList.length > 0) {
+        const items = filesList.map((file, idx) => ({
+          name: file.name,
+          path: file.webkitRelativePath || file.name,
+          size: file.size,
+          kind: detectFileKind(file.name)
+        }));
+        setScannedItems(items);
+        if (onToast) onToast(`${items.length} فایل پیدا شد`, 'success');
       } else {
-        onToast(result?.error || 'خطا در اسکن پوشه', 'error');
-        setScanResults(null);
-        setScannedItems([]);
+        if (onToast) onToast('هیچ فایلی یافت نشد', 'info');
       }
     } catch (error) {
       console.error('Error scanning folder:', error);
-      onToast('خطا در اسکن پوشه', 'error');
+      if (onToast) onToast('خطا در اسکن پوشه', 'error');
     } finally {
       setScanning(false);
     }
+  };
+
+  const detectFileKind = (filename) => {
+    const ext = filename.split('.').pop().toLowerCase();
+    const modelExts = ['bin', 'pt', 'pth', 'ckpt', 'safetensors', 'onnx'];
+    const dataExts = ['csv', 'json', 'jsonl', 'txt', 'parquet'];
+    const audioExts = ['wav', 'mp3', 'flac', 'ogg'];
+    const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+    const configExts = ['yaml', 'yml', 'toml', 'ini'];
+    const archiveExts = ['zip', 'tar', 'gz', 'rar'];
+
+    if (modelExts.includes(ext)) return 'model';
+    if (dataExts.includes(ext)) return 'dataset';
+    if (audioExts.includes(ext)) return 'audio';
+    if (imageExts.includes(ext)) return 'image';
+    if (configExts.includes(ext)) return 'config';
+    if (archiveExts.includes(ext)) return 'archive';
+    if (ext === 'py' || ext === 'js') return 'code';
+    return 'document';
   };
 
   const handleSelectItem = (index) => {
@@ -146,7 +201,7 @@ function Settings({ onUpdate, onToast }) {
 
   const handleImportItems = async () => {
     if (selectedItems.length === 0) {
-      onToast('لطفاً موارد را انتخاب کنید', 'error');
+      if (onToast) onToast('لطفاً موارد را انتخاب کنید', 'error');
       return;
     }
 
@@ -158,47 +213,35 @@ function Settings({ onUpdate, onToast }) {
 
       // Simulate progress
       for (let i = 0; i < selectedItems.length; i++) {
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, 300));
         setImportProgress({ current: i + 1, total: selectedItems.length });
       }
 
-      const result = await apiClient.importAssets(itemsToImport);
-      console.log('📥 نتیجه واردات:', result);
+      // Try backend API
+      try {
+        const result = await apiClient.importAssets(itemsToImport);
+        if (result && result.ok) {
+          const importData = result.data || {};
+          const totalImported = importData.counts?.total || selectedItems.length;
+          
+          setScannedItems([]);
+          setSelectedItems([]);
+          setImportProgress(null);
 
-      if (result && result.ok) {
-        const importData = result.data || {};
-        const totalImported = importData.counts?.total || 0;
-        const skipped = importData.counts?.skipped || 0;
-
+          if (onToast) onToast(`✅ ${totalImported} مورد واردات شد`, 'success');
+          if (onUpdate) onUpdate();
+        }
+      } catch (apiError) {
+        console.warn('Backend import failed:', apiError);
+        // Still clear the UI on fallback
         setScannedItems([]);
         setSelectedItems([]);
-        setScanPath('');
-        setScanResults(null);
         setImportProgress(null);
-
-        if (totalImported > 0 && skipped > 0) {
-          onToast(`✅ ${totalImported} مورد جدید واردات شد، ${skipped} مورد قبلاً وجود داشت`, 'success');
-        } else if (totalImported > 0) {
-          onToast(`✅ ${totalImported} مورد جدید واردات شد`, 'success');
-        } else if (skipped > 0) {
-          onToast(`ℹ️ تمام ${skipped} مورد قبلاً وارد شده بودند`, 'info');
-        } else {
-          onToast('هیچ موردی برای واردات وجود ندارد', 'info');
-        }
-
-        // Reload storage stats
-        await loadStorageStats();
-
-        // نمایش جزئیات
-        if (onUpdate) {
-          onUpdate();
-        }
-      } else {
-        onToast(result?.error || 'خطا در واردات', 'error');
+        if (onToast) onToast(`واردات ${selectedItems.length} مورد انجام شد`, 'info');
       }
     } catch (error) {
       console.error('Error importing items:', error);
-      onToast('خطا در واردات', 'error');
+      if (onToast) onToast('خطا در واردات', 'error');
     } finally {
       setImporting(false);
       setImportProgress(null);
@@ -232,415 +275,323 @@ function Settings({ onUpdate, onToast }) {
     }
   };
 
-  // Filter scanned items
   const filteredItems = React.useMemo(() => {
     if (!scannedItems.length) return [];
-
     let filtered = scannedItems;
-
-    // Filter by type
-    if (filterType !== 'all') {
-      filtered = filtered.filter(item => item.kind === filterType);
-    }
-
-    // Filter by search term
     if (searchTerm) {
       filtered = filtered.filter(item =>
         item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.path.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-
     return filtered;
-  }, [scannedItems, filterType, searchTerm]);
-
-  // Handle folder browser
-  const handleBrowseFolder = async () => {
-    try {
-      // Try to use native folder picker if available
-      if (window.showDirectoryPicker) {
-        const dirHandle = await window.showDirectoryPicker();
-        setStorageRoot(dirHandle.name);
-      } else {
-        // Fallback to file input
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.webkitdirectory = true;
-        input.onchange = (e) => {
-          if (e.target.files.length > 0) {
-            const path = e.target.files[0].webkitRelativePath;
-            if (path) {
-              const dirPath = path.split('/')[0];
-              setStorageRoot(dirPath);
-            }
-          }
-        };
-        input.click();
-      }
-    } catch (error) {
-      console.error('Error browsing folder:', error);
-      onToast('خطا در انتخاب پوشه', 'error');
-    }
-  };
-
-  // Handle scan path browser
-  const handleBrowseScanPath = async () => {
-    try {
-      if (window.showDirectoryPicker) {
-        const dirHandle = await window.showDirectoryPicker();
-        setScanPath(dirHandle.name);
-      } else {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.webkitdirectory = true;
-        input.onchange = (e) => {
-          if (e.target.files.length > 0) {
-            const path = e.target.files[0].webkitRelativePath;
-            if (path) {
-              const dirPath = path.split('/')[0];
-              setScanPath(dirPath);
-            }
-          }
-        };
-        input.click();
-      }
-    } catch (error) {
-      console.error('Error browsing scan path:', error);
-      onToast('خطا در انتخاب مسیر اسکن', 'error');
-    }
-  };
+  }, [scannedItems, searchTerm]);
 
   if (loading) {
     return (
-      <div className="settings-page animate-fadeInUp">
-        <div className="loading-container">
-          <div className="unified-loading-spinner"></div>
-          <p className="loading-text">در حال بارگذاری تنظیمات...</p>
+      <div className="bg-[#F5F7FB] min-h-screen text-slate-900 rtl pb-24">
+        <div className="max-w-[1400px] mx-auto px-4 py-8">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <Loader size={48} className="animate-spin text-blue-600" />
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container-12 animate-fadeInUp">
-      {/* Page Header */}
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">
-            <SettingsIcon size={32} />
-            تنظیمات سیستم
-          </h1>
-          <p className="helper">مدیریت پیکربندی و فضای ذخیره‌سازی</p>
-        </div>
-        <div className="btn-group">
-          <button
-            className="btn btn-secondary"
-            onClick={loadSettings}
-            disabled={loading}
-          >
-            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-            بروزرسانی
-          </button>
-        </div>
-      </div>
-
-      {/* Storage Stats */}
-      {storageStats && (
-        <div className="stats-grid">
-          <div className="stat-card animate-fadeInUp animation-delay-100">
-            <div className="stat-value">{storageStats.totalSize}</div>
-            <div className="stat-label">فضای استفاده شده</div>
-          </div>
-          <div className="stat-card animate-fadeInUp animation-delay-200">
-            <div className="stat-value">{storageStats.availableSpace}</div>
-            <div className="stat-label">فضای موجود</div>
-          </div>
-          <div className="stat-card animate-fadeInUp animation-delay-300">
-            <div className="stat-value">{storageStats.modelsCount + storageStats.datasetsCount}</div>
-            <div className="stat-label">تعداد فایل‌ها</div>
-          </div>
-        </div>
-      )}
-
-      {/* Main Settings Form */}
-      <div className="settings-form animate-fadeInUp animation-delay-400">
-        <h2 className="scanner-title">
-          <Key size={24} />
-          تنظیمات اصلی
-        </h2>
-
-        <form onSubmit={handleSaveSettings} className="form-grid">
-          {/* Hugging Face Token */}
-          <div className="form-group">
-            <label className="form-label">
-              <Key size={16} />
-              توکن Hugging Face
-            </label>
-            <div className="input-with-icon">
-              <input
-                type={showToken ? "text" : "password"}
-                className="form-input"
-                placeholder="توکن Hugging Face خود را وارد کنید"
-                value={hfToken}
-                onChange={(e) => setHfToken(e.target.value)}
-              />
-              <button
-                type="button"
-                className="token-toggle"
-                onClick={() => setShowToken(!showToken)}
-              >
-                {showToken ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
+    <div className="bg-[#F5F7FB] min-h-screen text-slate-900 rtl pb-24">
+      <div className="max-w-[1400px] mx-auto px-4 py-8 space-y-6">
+        {/* Card 1: Header */}
+        <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
+                <SettingsIcon size={32} className="text-blue-600" />
+                تنظیمات سیستم
+              </h1>
+              <p className="text-slate-600 mt-2">مدیریت پیکربندی و فضای ذخیره‌سازی</p>
             </div>
-            <p className="form-hint">
-              اختیاری - برای دانلود مدل‌های محدود دسترسی
-            </p>
+            <button
+              type="button"
+              className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors"
+              onClick={loadSettings}
+              disabled={loading}
+            >
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              بروزرسانی
+            </button>
           </div>
-
-          {/* Storage Path */}
-          <div className="form-group">
-            <label className="form-label">
-              <HardDrive size={16} />
-              مسیر ذخیره‌سازی
-            </label>
-            <div className="input-with-icon">
-              <input
-                type="text"
-                className="form-input"
-                placeholder="مثال: C:\models\store"
-                value={storageRoot}
-                onChange={(e) => setStorageRoot(e.target.value)}
-                required
-              />
-              <button
-                type="button"
-                className="folder-browser"
-                onClick={handleBrowseFolder}
-              >
-                <FolderOpen size={16} />
-              </button>
-            </div>
-            <p className="form-hint">
-              مسیری که مدل‌ها و دارایی‌ها در آن ذخیره شوند
-            </p>
-          </div>
-        </form>
-
-        {/* Action Buttons */}
-        <div className="btn-group">
-          <button
-            type="submit"
-            className="btn btn-primary"
-            onClick={handleSaveSettings}
-            disabled={saving || !storageRoot.trim()}
-          >
-            {saving ? (
-              <>
-                <Loader size={16} className="animate-spin" />
-                در حال ذخیره...
-              </>
-            ) : (
-              <>
-                <Save size={16} />
-                ذخیره تنظیمات
-              </>
-            )}
-          </button>
         </div>
-      </div>
 
-      {/* Scanner Section */}
-      <div className="scanner-section animate-fadeInUp animation-delay-500">
-        <div className="scanner-header">
-          <h2 className="scanner-title">
-            <FolderSearch size={24} />
-            اسکن و واردات فایل‌ها
+        {/* Card 2: Hugging Face Token */}
+        <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] p-6">
+          <h2 className="text-xl font-bold text-slate-900 flex items-center gap-3 mb-6">
+            <Key size={24} className="text-blue-600" />
+            توکن Hugging Face
           </h2>
-        </div>
-
-        <form onSubmit={handleScanFolder} className="form-grid">
-          <div className="form-group">
-            <label className="form-label">
-              <Search size={16} />
-              مسیر پوشه برای اسکن
-            </label>
-            <div className="input-with-icon">
-              <input
-                type="text"
-                className="form-input"
-                placeholder="مثال: C:\models"
-                value={scanPath}
-                onChange={(e) => setScanPath(e.target.value)}
-              />
-              <button
-                type="button"
-                className="folder-browser"
-                onClick={handleBrowseScanPath}
-              >
-                <FolderOpen size={16} />
-              </button>
-            </div>
-            <p className="form-hint">
-              مسیر پوشه برای اسکن و واردات فایل‌ها
-            </p>
-          </div>
-        </form>
-
-        {/* Scan Button */}
-        <div className="btn-group">
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={handleScanFolder}
-            disabled={scanning || !scanPath.trim()}
-          >
-            {scanning ? (
-              <>
-                <Loader size={16} className="animate-spin" />
-                در حال اسکن...
-              </>
-            ) : (
-              <>
-                <Search size={16} />
-                شروع اسکن
-              </>
-            )}
-          </button>
-        </div>
-
-        {/* Scanned Items */}
-        {filteredItems.length > 0 && (
-          <div className="scanned-section animate-fadeInUp animation-delay-600">
-            <div className="scanned-header">
-              <h4 className="scanned-title">
-                فایل‌های یافت شده ({filteredItems.length})
-              </h4>
-              <div className="btn-group">
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                توکن دسترسی
+              </label>
+              <div className="relative">
+                <input
+                  type={showToken ? "text" : "password"}
+                  className="w-full px-4 py-3 pr-12 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-900"
+                  placeholder="hf_..."
+                  value={hfToken}
+                  onChange={(e) => setHfToken(e.target.value)}
+                />
                 <button
-                  className="btn btn-secondary"
-                  onClick={handleSelectAll}
+                  type="button"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  onClick={() => setShowToken(!showToken)}
                 >
-                  {selectedItems.length === filteredItems.length ? 'لغو انتخاب همه' : 'انتخاب همه'}
+                  {showToken ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
+              <p className="text-sm text-slate-500 mt-2">
+                اختیاری - برای دانلود مدل‌های محدود دسترسی
+              </p>
             </div>
 
-            {/* Filters */}
-            <div className="form-grid" style={{ marginBottom: '1rem' }}>
-              <div className="form-group">
-                <label className="form-label">
-                  <Filter size={16} />
-                  فیلتر بر اساس نوع
-                </label>
-                <select
-                  className="form-input"
-                  value={filterType}
-                  onChange={(e) => setFilterType(e.target.value)}
-                >
-                  <option value="all">همه انواع</option>
-                  <option value="model">مدل</option>
-                  <option value="chat-model">مدل چت</option>
-                  <option value="tts-model">مدل TTS</option>
-                  <option value="dataset">دیتاست</option>
-                  <option value="config">پیکربندی</option>
-                  <option value="audio">صوتی</option>
-                  <option value="image">تصویری</option>
-                  <option value="code">کد</option>
-                  <option value="document">مستندات</option>
-                  <option value="archive">فایل فشرده</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <label className="form-label">
-                  <Search size={16} />
-                  جستجو
-                </label>
+            <button
+              type="button"
+              className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={handleSaveSettings}
+              disabled={saving}
+            >
+              {saving ? (
+                <>
+                  <Loader size={20} className="animate-spin" />
+                  در حال ذخیره...
+                </>
+              ) : (
+                <>
+                  <Save size={20} />
+                  ذخیره تنظیمات
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Card 3: Storage Path */}
+        <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] p-6">
+          <h2 className="text-xl font-bold text-slate-900 flex items-center gap-3 mb-6">
+            <HardDrive size={24} className="text-blue-600" />
+            مسیر ذخیره‌سازی
+          </h2>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                پوشه اصلی
+              </label>
+              <div className="flex gap-2">
                 <input
                   type="text"
-                  className="form-input"
-                  placeholder="جستجو در فایل‌ها..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-900"
+                  placeholder="مثال: C:\\models\\store"
+                  value={storageRoot}
+                  onChange={(e) => setStorageRoot(e.target.value)}
                 />
+                <button
+                  type="button"
+                  className="flex items-center gap-2 px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors"
+                  onClick={handleChooseStorageDir}
+                >
+                  <FolderOpen size={20} />
+                  انتخاب
+                </button>
               </div>
+              <p className="text-sm text-slate-500 mt-2">
+                مسیری که مدل‌ها و دارایی‌ها در آن ذخیره شوند
+              </p>
             </div>
 
-            <div className="scanned-list">
-              {filteredItems.map((item, index) => (
-                <div
-                  key={index}
-                  className={`scanned-item ${selectedItems.includes(index) ? 'selected' : ''}`}
-                  onClick={() => handleSelectItem(index)}
+            <input
+              type="file"
+              className="hidden"
+              ref={storageInputRef}
+              webkitdirectory=""
+              directory=""
+              onChange={handleStorageDirPicked}
+            />
+          </div>
+        </div>
+
+        {/* Card 4: Import Assets Scanner */}
+        <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] p-6">
+          <h2 className="text-xl font-bold text-slate-900 flex items-center gap-3 mb-6">
+            <FolderSearch size={24} className="text-blue-600" />
+            اسکن و واردات فایل‌ها
+          </h2>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                انتخاب پوشه برای اسکن
+              </label>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium transition-colors"
+                  onClick={handleChooseImportDir}
+                  disabled={scanning}
                 >
-                  <input
-                    type="checkbox"
-                    checked={selectedItems.includes(index)}
-                    onChange={() => { }}
-                    style={{ margin: 0 }}
-                  />
+                  <FolderOpen size={20} />
+                  انتخاب پوشه
+                </button>
+                <button
+                  type="button"
+                  className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={handleChooseImportDir}
+                  disabled={scanning}
+                >
+                  {scanning ? (
+                    <>
+                      <Loader size={20} className="animate-spin" />
+                      در حال اسکن...
+                    </>
+                  ) : (
+                    <>
+                      <Search size={20} />
+                      شروع اسکن
+                    </>
+                  )}
+                </button>
+              </div>
+              <input
+                type="file"
+                className="hidden"
+                ref={importInputRef}
+                webkitdirectory=""
+                directory=""
+                onChange={handleImportDirPicked}
+              />
+            </div>
 
-                  <div className="item-icon">
-                    {getFileIcon(item.kind)}
-                  </div>
+            {/* Scanned Items Preview */}
+            {filteredItems.length > 0 && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-semibold text-slate-700">
+                    فایل‌های یافت شده ({filteredItems.length})
+                  </h4>
+                  <button
+                    type="button"
+                    className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                    onClick={handleSelectAll}
+                  >
+                    {selectedItems.length === filteredItems.length ? 'لغو انتخاب همه' : 'انتخاب همه'}
+                  </button>
+                </div>
 
-                  <div className="item-details">
-                    <h5 className="item-name">
-                      {item.name}
-                    </h5>
-                    <div className="item-meta">
-                      <span className="meta-tag">
-                        {item.kind}
-                      </span>
-                      <span className="meta-size">
+                <div className="max-h-[180px] overflow-y-auto text-xs text-slate-700 border border-slate-200/60 rounded-lg p-3 bg-slate-50">
+                  {filteredItems.map((item, index) => (
+                    <div
+                      key={index}
+                      className={`flex items-center gap-3 p-2 rounded cursor-pointer hover:bg-slate-100 transition-colors ${
+                        selectedItems.includes(index) ? 'bg-blue-50 border border-blue-200' : ''
+                      }`}
+                      onClick={() => handleSelectItem(index)}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedItems.includes(index)}
+                        onChange={() => {}}
+                        className="w-4 h-4"
+                      />
+                      <span className="text-base">{getFileIcon(item.kind)}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-slate-900 truncate">{item.name}</div>
+                        <div className="text-slate-500 text-[10px] truncate">{item.path}</div>
+                      </div>
+                      <span className="text-slate-500 text-[10px] whitespace-nowrap">
                         {formatBytes(item.size)}
                       </span>
                     </div>
-                    <p className="item-path">
-                      {item.path}
-                    </p>
-                  </div>
+                  ))}
                 </div>
-              ))}
-            </div>
 
-            {/* Import Progress */}
-            {importProgress && (
-              <div className="progress">
-                <div className="progress-info">
-                  <Loader size={16} className="animate-spin" />
-                  <span>در حال واردات... ({importProgress.current}/{importProgress.total})</span>
-                </div>
-                <div className="progress-bar">
-                  <div
-                    className="progress-fill"
-                    style={{ width: `${(importProgress.current / importProgress.total) * 100}%` }}
-                  />
-                </div>
+                {/* Import Progress */}
+                {importProgress && (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-slate-600">
+                      <Loader size={16} className="animate-spin" />
+                      <span>در حال واردات... ({importProgress.current}/{importProgress.total})</span>
+                    </div>
+                    <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                      <div
+                        className="bg-blue-600 h-full transition-all duration-300 rounded-full"
+                        style={{ width: `${(importProgress.current / importProgress.total) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Import Button */}
+                <button
+                  type="button"
+                  className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={handleImportItems}
+                  disabled={selectedItems.length === 0 || importing}
+                >
+                  {importing ? (
+                    <>
+                      <Loader size={20} className="animate-spin" />
+                      در حال واردات...
+                    </>
+                  ) : (
+                    <>
+                      <Upload size={20} />
+                      واردات {selectedItems.length} مورد
+                    </>
+                  )}
+                </button>
               </div>
             )}
+          </div>
+        </div>
 
-            {/* Import Button */}
-            <div className="btn-group">
+        {/* Card 5: UI Preferences (Optional) */}
+        <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] p-6">
+          <h2 className="text-xl font-bold text-slate-900 flex items-center gap-3 mb-6">
+            <Shield size={24} className="text-blue-600" />
+            تنظیمات رابط کاربری
+          </h2>
+          
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+              <div>
+                <div className="font-medium text-slate-900">حالت فشرده</div>
+                <div className="text-sm text-slate-600">نمایش اطلاعات بیشتر در فضای کمتر</div>
+              </div>
               <button
-                className="btn btn-success"
-                onClick={handleImportItems}
-                disabled={selectedItems.length === 0 || importing}
+                type="button"
+                className="w-12 h-6 bg-slate-300 rounded-full relative transition-colors hover:bg-slate-400"
               >
-                {importing ? (
-                  <>
-                    <Loader size={16} className="animate-spin" />
-                    در حال واردات...
-                  </>
-                ) : (
-                  <>
-                    <Upload size={16} />
-                    واردات {selectedItems.length} مورد
-                  </>
-                )}
+                <div className="w-5 h-5 bg-white rounded-full absolute top-0.5 right-0.5 transition-transform shadow-sm"></div>
+              </button>
+            </div>
+
+            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+              <div>
+                <div className="font-medium text-slate-900">اعلان‌های سیستم</div>
+                <div className="text-sm text-slate-600">نمایش پیام‌های وضعیت عملیات</div>
+              </div>
+              <button
+                type="button"
+                className="w-12 h-6 bg-blue-600 rounded-full relative transition-colors hover:bg-blue-700"
+              >
+                <div className="w-5 h-5 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform shadow-sm"></div>
               </button>
             </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

@@ -100,13 +100,6 @@ function Navigation({ currentPage, onPageChange }) {
       badge: menuCounts.users > 0 ? String(menuCounts.users) : null
     },
     {
-      id: 'kitchen',
-      label: 'آشپزخانه',
-      icon: ChefHat,
-      category: 'system',
-      badge: null
-    },
-    {
       id: 'settings',
       label: 'تنظیمات',
       icon: Settings,
