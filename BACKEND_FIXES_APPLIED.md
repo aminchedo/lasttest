@@ -4,7 +4,7 @@
 
 ## Summary
 
-Applied three critical fixes to unblock production deployment of the ML Training Platform:
+Applied six critical fixes to achieve full production readiness of the ML Training Platform:
 
 ---
 
@@ -134,7 +134,171 @@ This broke the Available Resources page ("منابع موجود") which expected
 
 ---
 
-## 4. ✅ Analytics API Enhancement
+## 4. ✅ Multi-Run Training Isolation
+
+### Problem
+Multiple training jobs running in parallel would interfere with each other because the system used single global variables to track training state.
+
+### Solution
+
+**File: `server/routes/training.js`**
+- Converted single global training state to `activeRuns` Map keyed by `runId`
+- Each training run now has isolated state tracking
+- Added comprehensive logging to `training_logs` table
+- Real-time status updates use per-run state
+
+**Key Changes:**
+```javascript
+// Multi-run isolation: Track active runs by runId
+const activeRuns = new Map();
+
+// Initialize run state in activeRuns map
+activeRuns.set(runId, {
+  status: 'running',
+  jobId,
+  baseModel,
+  datasets,
+  teacherModel,
+  currentEpoch: startEpoch,
+  totalEpochs: epochs,
+  lastMetrics: {},
+  startTime: new Date().toISOString()
+});
+```
+
+### Result
+- Multiple training runs can execute in parallel without interference
+- Each run maintains isolated metrics and logs
+- Real-time status updates are accurate per run
+- Analytics can track multiple concurrent runs
+
+---
+
+## 5. ✅ SSE Connection Cleanup & Lifecycle Safety
+
+### Problem
+SSE (Server-Sent Events) connections for download progress were not properly closed, leading to memory leaks and hanging connections.
+
+### Solution
+
+**File: `server/routes/hfDownload.js`**
+- Added `req.on('close')` and `res.on('close')` handlers
+- Explicit SSE stream termination on terminal states ('done'/'error')
+- Proper cleanup of rate limiting maps
+
+**File: `client/src/pages/Models.jsx`**
+- Replaced polling with EventSource for real-time progress
+- Added proper EventSource cleanup in useEffect
+- Handle 'done' and 'error' terminal states correctly
+
+**Key Changes:**
+```javascript
+// Cleanup on client disconnect
+req.on('close', () => {
+  clearInterval(pollInterval);
+  downloadSessions.delete(sessionId);
+  activeDownloads.delete(clientIP);
+});
+
+// Cleanup on response close
+res.on('close', () => {
+  clearInterval(pollInterval);
+  downloadSessions.delete(sessionId);
+  activeDownloads.delete(clientIP);
+});
+```
+
+### Result
+- SSE connections close properly on completion
+- No memory leaks from hanging connections
+- Frontend properly cleans up EventSource on navigation
+- Download progress shows accurate real-time updates
+
+---
+
+## 6. ✅ Disk Space Error Handling (ENOSPC)
+
+### Problem
+Large model downloads could fail silently when disk space ran out, leaving partial files and reporting success.
+
+### Solution
+
+**File: `server/routes/hfDownload.js`**
+- Added preflight disk space check before download
+- Wrapped file operations in try/catch for ENOSPC
+- Emit proper SSE error events on disk full
+- Clean up partial files on failure
+
+**Key Changes:**
+```javascript
+// Check disk space before starting
+try {
+  const fs = await import('fs/promises');
+  const stats = await fs.statfs('/tmp');
+  const availableBytes = stats.bavail * stats.bsize;
+  if (availableBytes < totalBytes * 1.1) {
+    throw new Error('ENOSPC: No space left on device');
+  }
+} catch (spaceError) {
+  if (spaceError.code === 'ENOSPC' || spaceError.message.includes('ENOSPC')) {
+    // Handle disk full error
+  }
+}
+```
+
+### Result
+- Downloads fail gracefully when disk is full
+- Users see clear error messages
+- No partial/corrupt files left on disk
+- SSE streams emit proper error status
+
+---
+
+## 7. ✅ Download Access Control & Rate Limiting
+
+### Problem
+No rate limiting or access control on model downloads, allowing DoS attacks and unlimited concurrent downloads.
+
+### Solution
+
+**File: `server/routes/hfDownload.js`**
+- Added rate limiting: one active download per IP
+- Enforced modelId allowlist validation
+- Return 429 status for concurrent download attempts
+- Track active downloads per client IP
+
+**Key Changes:**
+```javascript
+// Rate limiting per IP
+const activeDownloads = new Map();
+
+if (activeDownloads.has(clientIP)) {
+  return res.status(429).json({
+    ok: false,
+    error: 'rate_limited',
+    message: 'Only one active download allowed at a time'
+  });
+}
+
+// Model ID validation
+if (!modelMeta) {
+  return res.status(400).json({
+    ok: false,
+    error: 'invalid_model',
+    message: 'Model ID not permitted'
+  });
+}
+```
+
+### Result
+- Only one download per IP address allowed
+- Only catalog-approved models can be downloaded
+- 429 status code for rate limit violations
+- Prevents DoS attacks via download spam
+
+---
+
+## 8. ✅ Analytics API Enhancement
 
 ### Problem
 Analytics page had no backend API to load training history or per-run details.

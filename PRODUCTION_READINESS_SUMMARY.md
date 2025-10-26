@@ -4,7 +4,7 @@
 
 ## ✅ ALL FIXES COMPLETED
 
-Three critical backend issues have been fixed to unblock production deployment.
+Six critical backend issues have been fixed to achieve full production readiness.
 
 ---
 
@@ -109,7 +109,185 @@ res.write(`data: ${JSON.stringify({
 
 ---
 
-## Issue #3: Asset API Consistency ✅ FIXED
+## Issue #3: Multi-Run Training Isolation ✅ FIXED
+
+### The Problem
+When multiple training jobs ran in parallel, metrics and logs would leak across runs because the system used single global variables to track training state.
+
+### The Root Cause
+The training system used in-memory global variables instead of per-run isolation, causing cross-contamination between concurrent training jobs.
+
+### What Was Fixed
+
+**File: `server/routes/training.js`**
+- Converted single global training state to `activeRuns` Map keyed by `runId`
+- Each training run now has isolated state tracking
+- Added comprehensive logging to `training_logs` table
+- Real-time status updates use per-run state
+
+**Key Changes:**
+```javascript
+// Before: Single global state
+let currentTraining = { ... };
+
+// After: Multi-run isolation
+const activeRuns = new Map();
+activeRuns.set(runId, {
+  status: 'running',
+  jobId,
+  baseModel,
+  datasets,
+  currentEpoch,
+  lastMetrics: { ... }
+});
+```
+
+### Result
+- Multiple training runs can execute in parallel without interference
+- Each run maintains isolated metrics and logs
+- Real-time status updates are accurate per run
+- Analytics can track multiple concurrent runs
+
+### How to Verify
+1. Start two training jobs simultaneously
+2. Check Analytics page - both runs should appear separately
+3. Verify metrics don't cross-contaminate between runs
+4. Check that each run's logs are isolated
+
+---
+
+## Issue #4: SSE Connection Leaks ✅ FIXED
+
+### The Problem
+SSE (Server-Sent Events) connections for download progress were not properly closed, leading to memory leaks and hanging connections.
+
+### The Root Cause
+Missing connection close handlers and no explicit SSE stream termination on completion or error.
+
+### What Was Fixed
+
+**File: `server/routes/hfDownload.js`**
+- Added `req.on('close')` and `res.on('close')` handlers
+- Explicit SSE stream termination on terminal states ('done'/'error')
+- Proper cleanup of rate limiting maps
+- Frontend EventSource cleanup on component unmount
+
+**File: `client/src/pages/Models.jsx`**
+- Replaced polling with EventSource for real-time progress
+- Added proper EventSource cleanup in useEffect
+- Handle 'done' and 'error' terminal states correctly
+
+### Result
+- SSE connections close properly on completion
+- No memory leaks from hanging connections
+- Frontend properly cleans up EventSource on navigation
+- Download progress shows accurate real-time updates
+
+### How to Verify
+1. Start a model download
+2. Watch progress bar reach 100%
+3. Verify connection closes automatically
+4. Check browser dev tools - no hanging connections
+
+---
+
+## Issue #5: Disk Space Error Handling ✅ FIXED
+
+### The Problem
+Large model downloads could fail silently when disk space ran out, leaving partial files and reporting success.
+
+### The Root Cause
+No ENOSPC (No Space Left on Device) error handling in download process.
+
+### What Was Fixed
+
+**File: `server/routes/hfDownload.js`**
+- Added preflight disk space check before download
+- Wrapped file operations in try/catch for ENOSPC
+- Emit proper SSE error events on disk full
+- Clean up partial files on failure
+
+**Key Changes:**
+```javascript
+// Preflight disk space check
+const stats = await fs.statfs('/tmp');
+if (availableBytes < totalBytes * 1.1) {
+  throw new Error('ENOSPC: No space left on device');
+}
+
+// ENOSPC error handling
+if (error.message.includes('ENOSPC')) {
+  errorStatus = 'error';
+  errorMessage = 'No space left on device';
+}
+```
+
+### Result
+- Downloads fail gracefully when disk is full
+- Users see clear error messages
+- No partial/corrupt files left on disk
+- SSE streams emit proper error status
+
+### How to Verify
+1. Fill up disk space (or simulate with small available space)
+2. Try to download a large model
+3. Verify error message: "No space left on device"
+4. Check that no partial files are created
+
+---
+
+## Issue #6: Download Access Control & Rate Limiting ✅ FIXED
+
+### The Problem
+No rate limiting or access control on model downloads, allowing DoS attacks and unlimited concurrent downloads.
+
+### The Root Cause
+Missing validation and throttling mechanisms for download requests.
+
+### What Was Fixed
+
+**File: `server/routes/hfDownload.js`**
+- Added rate limiting: one active download per IP
+- Enforced modelId allowlist validation
+- Return 429 status for concurrent download attempts
+- Track active downloads per client IP
+
+**Key Changes:**
+```javascript
+// Rate limiting per IP
+if (activeDownloads.has(clientIP)) {
+  return res.status(429).json({
+    ok: false,
+    error: 'rate_limited',
+    message: 'Only one active download allowed at a time'
+  });
+}
+
+// Model ID validation
+if (!modelMeta) {
+  return res.status(400).json({
+    ok: false,
+    error: 'invalid_model',
+    message: 'Model ID not permitted'
+  });
+}
+```
+
+### Result
+- Only one download per IP address allowed
+- Only catalog-approved models can be downloaded
+- 429 status code for rate limit violations
+- Prevents DoS attacks via download spam
+
+### How to Verify
+1. Start a download from one IP
+2. Try to start another download from same IP
+3. Verify second request returns 429 status
+4. Try downloading non-catalog model - should be rejected
+
+---
+
+## Issue #7: Asset API Consistency ✅ FIXED
 
 ### The Problem
 Different endpoints returned different response shapes:

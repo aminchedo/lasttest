@@ -98,19 +98,25 @@ router.get('/training/jobs', async (req, res) => {
             runId: run.id,
             jobId: run.job_id,
             status: run.status || run.job_status || 'unknown',
+            name: run.base_model || 'Unknown Model',
+            modelName: run.base_model,
             baseModel: run.base_model,
             datasets: run.datasets ? JSON.parse(run.datasets) : [],
             teacherModel: run.teacher_model,
             epoch: run.epoch,
+            totalEpochs: run.epoch || 0,
             trainLoss: run.train_loss,
             valLoss: run.val_loss,
             accuracy: run.accuracy,
+            finalAccuracy: run.accuracy,
+            bestAccuracy: run.accuracy,
             throughput: run.throughput,
             lr: run.lr,
             bestCheckpoint: run.best_ckpt,
             lastCheckpoint: run.last_ckpt,
             startedAt: run.started_at,
             finishedAt: run.finished_at,
+            completedAt: run.finished_at,
             updatedAt: run.updated_at,
             progress: run.job_progress || 100
         }));
@@ -153,44 +159,86 @@ router.get('/training/status/:runId', async (req, res) => {
 
         // Get training metrics history for this run
         const metricsHistory = await allAsync(
-            `SELECT * FROM training_metrics WHERE run_id = ? ORDER BY timestamp ASC`,
+            `SELECT * FROM training_metrics WHERE run_id = ? ORDER BY step ASC`,
             [runId]
         );
 
-        // Get job logs/events (mock for now, can be enhanced)
-        const logs = [
-            {
+        // Get persisted logs for this run
+        const persistedLogs = await allAsync(
+            `SELECT * FROM training_logs WHERE run_id = ? ORDER BY timestamp ASC`,
+            [runId]
+        );
+
+        // Build logs array from persisted data
+        const logs = persistedLogs.map(log => ({
+            id: log.id,
+            timestamp: log.timestamp,
+            level: log.level,
+            message: log.message,
+            details: log.details || ''
+        }));
+
+        // If no persisted logs, create basic ones from run data
+        if (logs.length === 0) {
+            logs.push({
                 id: `${runId}-log-1`,
                 timestamp: run.started_at,
                 level: 'info',
                 message: 'Training started',
                 details: `Base model: ${run.base_model}`
-            },
-            {
-                id: `${runId}-log-2`,
-                timestamp: run.updated_at,
-                level: 'info',
-                message: `Training progress: ${run.epoch || 0} epochs completed`,
-                details: `Loss: ${run.train_loss || 'N/A'}, Val Loss: ${run.val_loss || 'N/A'}`
-            }
-        ];
-
-        if (run.status === 'completed' || run.job_status === 'completed') {
-            logs.push({
-                id: `${runId}-log-3`,
-                timestamp: run.finished_at || run.updated_at,
-                level: 'success',
-                message: 'Training completed successfully',
-                details: `Best checkpoint: ${run.best_ckpt || 'N/A'}`
             });
+            
+            if (run.epoch > 0) {
+                logs.push({
+                    id: `${runId}-log-2`,
+                    timestamp: run.updated_at,
+                    level: 'info',
+                    message: `Training progress: ${run.epoch || 0} epochs completed`,
+                    details: `Loss: ${run.train_loss || 'N/A'}, Val Loss: ${run.val_loss || 'N/A'}`
+                });
+            }
+
+            if (run.status === 'completed' || run.job_status === 'completed') {
+                logs.push({
+                    id: `${runId}-log-3`,
+                    timestamp: run.finished_at || run.updated_at,
+                    level: 'success',
+                    message: 'Training completed successfully',
+                    details: `Best checkpoint: ${run.best_ckpt || 'N/A'}`
+                });
+            }
         }
 
+        // Calculate latest KPIs from metrics history
+        const latestMetrics = metricsHistory[metricsHistory.length - 1] || {};
+        const accuracy = run.accuracy || calculateAccuracy(run.val_loss) || latestMetrics.accuracy || 0;
+        const valLoss = run.val_loss || latestMetrics.val_loss || 0;
+        const throughput = run.throughput || latestMetrics.throughput || 0;
+        const status = run.status || run.job_status || 'unknown';
+
+        // Build history arrays for charts
+        const lossHistory = metricsHistory.map(m => ({
+            step: m.step,
+            trainLoss: parseFloat(m.loss) || 0,
+            valLoss: parseFloat(m.val_loss) || 0
+        }));
+
+        const accuracyHistory = metricsHistory.map(m => ({
+            step: m.step,
+            accuracy: parseFloat(m.accuracy) || 0
+        }));
+
+        const throughputHistory = metricsHistory.map(m => ({
+            step: m.step,
+            throughput: parseFloat(m.throughput) || 0
+        }));
+
         // Format response
-        const status = {
+        const response = {
             // Basic info
             runId: run.id,
             jobId: run.job_id,
-            status: run.status || run.job_status || 'unknown',
+            status: status,
             progress: run.job_progress || 100,
             message: run.job_message || 'Training in progress',
             
@@ -199,14 +247,16 @@ router.get('/training/status/:runId', async (req, res) => {
             datasets: run.datasets ? JSON.parse(run.datasets) : [],
             teacherModel: run.teacher_model,
             
-            // Current metrics
-            metrics: {
-                epoch: run.epoch,
-                trainLoss: run.train_loss,
-                valLoss: run.val_loss,
-                accuracy: run.accuracy || calculateAccuracy(run.val_loss),
-                throughput: run.throughput,
-                learningRate: run.lr
+            // Current KPIs
+            accuracy: accuracy,
+            valLoss: valLoss,
+            throughput: throughput,
+            
+            // Historical data for charts
+            history: {
+                loss: lossHistory,
+                accuracy: accuracyHistory,
+                throughput: throughputHistory
             },
             
             // Checkpoints
@@ -218,24 +268,13 @@ router.get('/training/status/:runId', async (req, res) => {
             finishedAt: run.finished_at,
             updatedAt: run.updated_at,
             
-            // Historical data
-            history: metricsHistory.map(m => ({
-                step: m.step,
-                epoch: m.epoch,
-                loss: parseFloat(m.loss) || 0,
-                valLoss: parseFloat(m.val_loss) || 0,
-                accuracy: parseFloat(m.accuracy) || 0,
-                throughput: parseFloat(m.throughput) || 0,
-                timestamp: m.timestamp
-            })),
-            
             // Logs
             logs: logs
         };
 
         res.json({
             ok: true,
-            data: status
+            data: response
         });
     } catch (error) {
         console.error('Error fetching training status:', error);
