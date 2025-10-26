@@ -373,6 +373,19 @@ async function simulateTraining(jobId, runId, baseModel, datasets, teacherModel,
           'UPDATE jobs SET progress = ?, message = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
           [progress, message, jobId]
         );
+
+        // Insert step-level training metrics for history
+        if (step % 10 === 0) { // Log every 10 steps to avoid too much data
+          const stepLoss = trainLoss + (Math.random() * 0.2 - 0.1); // Slight variation per step
+          const accuracy = Math.min(0.95, 0.6 + (epoch * 0.05) + (Math.random() * 0.1));
+          const stepThroughput = (1000 / stepDuration).toFixed(2);
+          
+          await runAsync(
+            `INSERT INTO training_metrics (run_id, step, epoch, loss, val_loss, accuracy, throughput, timestamp)
+             VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
+            [runId, step, epoch + 1, stepLoss.toFixed(3), valLoss.toFixed(3), accuracy.toFixed(3), stepThroughput]
+          );
+        }
       }
 
       if (patienceCount >= maxPatience) {
