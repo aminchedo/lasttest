@@ -4,7 +4,7 @@ import {
   Settings, Brain, Database, TrendingUp, Download, Users, LogOut,
   LayoutDashboard, ChevronRight, ChevronLeft, Menu, X, Bell, Search,
   Zap, Shield, BarChart3, FileText, UserCheck, Home, Cpu, HardDrive,
-  Activity, Monitor, Smartphone, Tablet, ChefHat, Volume2
+  Activity, Monitor, Smartphone, Tablet, Volume2
 } from 'lucide-react';
 import api from '../api/endpoints';
 
@@ -98,13 +98,6 @@ function Navigation({ currentPage, onPageChange }) {
       icon: UserCheck,
       category: 'system',
       badge: menuCounts.users > 0 ? String(menuCounts.users) : null
-    },
-    {
-      id: 'kitchen',
-      label: 'آشپزخانه',
-      icon: ChefHat,
-      category: 'system',
-      badge: null
     },
     {
       id: 'settings',
