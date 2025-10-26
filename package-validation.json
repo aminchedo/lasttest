@@ -1,0 +1,29 @@
+{
+  "name": "ml-platform-validation",
+  "version": "1.0.0",
+  "description": "End-to-End System Validation for ML Training Platform",
+  "type": "module",
+  "main": "validation-script.js",
+  "scripts": {
+    "validate": "node validation-script.js",
+    "validate:verbose": "node validation-script.js --verbose",
+    "validate:report": "node validation-script.js --output=validation-report.json",
+    "validate:full": "node validation-script.js --verbose --output=validation-report.json"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "validation",
+    "testing",
+    "ml",
+    "machine-learning",
+    "e2e",
+    "api-testing"
+  ],
+  "author": "ML Platform Team",
+  "license": "MIT"
+}
