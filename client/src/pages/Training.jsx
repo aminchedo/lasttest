@@ -15,6 +15,7 @@ import {
 import apiClient from '../api/client';
 import MonitoringStrip from '../components/MonitoringStrip';
 import useBackgroundDownload from '../hooks/useBackgroundDownload';
+import { config, getApiUrl } from '../config';
 
 // ===== ENUMS & CONSTANTS =====
 const TRAINING_STATE = {
@@ -142,17 +143,24 @@ const Training = () => {
   const intervalRef = useRef(null);
   const metricsBufferRef = useRef([]);
   const startTimeRef = useRef(null);
+  const isMountedRef = useRef(true);
+  const timeoutRefs = useRef([]);
 
   // ===== LIFECYCLE =====
   useEffect(() => {
+    isMountedRef.current = true;
     loadAssets();
-    return cleanup;
+    
+    return () => {
+      isMountedRef.current = false;
+      cleanup();
+    };
   }, []);
 
   useEffect(() => {
     // Update charts every 500ms to avoid too many re-renders
     const chartUpdateInterval = setInterval(() => {
-      if (metricsBufferRef.current.length > 0) {
+      if (isMountedRef.current && metricsBufferRef.current.length > 0) {
         updateChartsData(metricsBufferRef.current);
         metricsBufferRef.current = [];
       }
@@ -170,16 +178,20 @@ const Training = () => {
         apiClient.getCatalogDatasets()
       ]);
 
-      setModels(modelsRes || []);
-      setDatasets(datasetsRes || []);
-
-      addLog('منابع با موفقیت بارگذاری شد', 'success');
+      if (isMountedRef.current) {
+        setModels(modelsRes || []);
+        setDatasets(datasetsRes || []);
+        addLog('منابع با موفقیت بارگذاری شد', 'success');
+      }
     } catch (error) {
-      console.error('Load assets error:', error);
-      toast.error('خطا در بارگذاری منابع');
-      addLog(`خطا در بارگذاری: ${error.message}`, 'error');
+      if (isMountedRef.current) {
+        toast.error('خطا در بارگذاری منابع');
+        addLog(`خطا در بارگذاری: ${error.message}`, 'error');
+      }
     } finally {
-      setLoading(false);
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
     }
   };
 
@@ -197,11 +209,6 @@ const Training = () => {
       setTrainingState(TRAINING_STATE.INITIALIZING);
       addLog('در حال آماده‌سازی برای شروع آموزش...', 'info');
 
-      // Debug logging
-      console.log('Selected Base Model:', selectedBaseModel);
-      console.log('Selected Datasets:', selectedDatasets);
-      console.log('Available Models:', models);
-
       const trainingConfig = {
         baseModel: selectedBaseModel?.id || selectedBaseModel,
         datasets: selectedDatasets.map(ds => ds.id || ds),
@@ -216,8 +223,6 @@ const Training = () => {
           )
         }
       };
-
-      console.log('Training Config being sent:', trainingConfig);
 
       const response = await apiClient.startTraining(trainingConfig);
 
@@ -236,11 +241,12 @@ const Training = () => {
         startMonitoring(response.id);
       }
     } catch (error) {
-      console.error('Start training error:', error);
       const msg = (error && error.response && error.response.data && (error.response.data.message || error.response.data.error)) || error.message || 'Training start failed';
-      toast.error(msg);
-      addLog(`خطا در شروع: ${error.message}`, 'error');
-      setTrainingState(TRAINING_STATE.IDLE);
+      if (isMountedRef.current) {
+        toast.error(msg);
+        addLog(`خطا در شروع: ${error.message}`, 'error');
+        setTrainingState(TRAINING_STATE.IDLE);
+      }
     }
   };
 
@@ -255,9 +261,10 @@ const Training = () => {
       toast.success('آموزش متوقف شد');
       addLog('آموزش به صورت موقت متوقف شد', 'warning');
     } catch (error) {
-      console.error('Pause error:', error);
-      toast.error('خطا در توقف آموزش');
-      addLog(`خطا در توقف: ${error.message}`, 'error');
+      if (isMountedRef.current) {
+        toast.error('خطا در توقف آموزش');
+        addLog(`خطا در توقف: ${error.message}`, 'error');
+      }
     }
   };
 
@@ -273,9 +280,10 @@ const Training = () => {
 
       startMonitoring(currentJobId);
     } catch (error) {
-      console.error('Resume error:', error);
-      toast.error('خطا در ادامه آموزش');
-      addLog(`خطا در ادامه: ${error.message}`, 'error');
+      if (isMountedRef.current) {
+        toast.error('خطا در ادامه آموزش');
+        addLog(`خطا در ادامه: ${error.message}`, 'error');
+      }
     }
   };
 
@@ -295,9 +303,10 @@ const Training = () => {
       toast.warning('آموزش کامل متوقف شد');
       addLog('آموزش به صورت کامل متوقف شد', 'warning');
     } catch (error) {
-      console.error('Stop error:', error);
-      toast.error('خطا در توقف آموزش');
-      addLog(`خطا در توقف: ${error.message}`, 'error');
+      if (isMountedRef.current) {
+        toast.error('خطا در توقف آموزش');
+        addLog(`خطا در توقف: ${error.message}`, 'error');
+      }
     }
   };
 
@@ -306,20 +315,30 @@ const Training = () => {
     // WebSocket connection for real-time updates
     try {
       wsRef.current = apiClient.subscribeToTraining(jobId, handleMetricsUpdate);
-      addLog('اتصال WebSocket برقرار شد', 'success');
+      if (isMountedRef.current) {
+        addLog('اتصال WebSocket برقرار شد', 'success');
+      }
     } catch (error) {
-      console.error('WebSocket error:', error);
-      addLog('خطا در اتصال WebSocket، استفاده از polling', 'warning');
+      if (isMountedRef.current) {
+        addLog('خطا در اتصال WebSocket، استفاده از polling', 'warning');
+      }
     }
 
     // Polling fallback
     intervalRef.current = setInterval(async () => {
+      if (!isMountedRef.current) {
+        clearInterval(intervalRef.current);
+        return;
+      }
       try {
         const status = await apiClient.getTrainingStatus(jobId);
-        handleStatusUpdate(status);
+        if (isMountedRef.current) {
+          handleStatusUpdate(status);
+        }
       } catch (error) {
-        console.error('Polling error:', error);
-        addLog(`خطا در دریافت وضعیت: ${error.message}`, 'error');
+        if (isMountedRef.current) {
+          addLog(`خطا در دریافت وضعیت: ${error.message}`, 'error');
+        }
       }
     }, 2000);
   };
@@ -338,6 +357,9 @@ const Training = () => {
 
   const cleanup = () => {
     stopMonitoring();
+    // Clear all pending timeouts
+    timeoutRefs.current.forEach(timeoutId => clearTimeout(timeoutId));
+    timeoutRefs.current = [];
   };
 
   // ===== METRICS HANDLING =====
@@ -503,9 +525,10 @@ const Training = () => {
       toast.success('مدل با موفقیت ذخیره شد');
       addLog(`مدل با نام "${modelName}" ذخیره شد`, 'success');
     } catch (error) {
-      console.error('Save model error:', error);
-      toast.error('خطا در ذخیره مدل');
-      addLog(`خطا در ذخیره مدل: ${error.message}`, 'error');
+      if (isMountedRef.current) {
+        toast.error('خطا در ذخیره مدل');
+        addLog(`خطا در ذخیره مدل: ${error.message}`, 'error');
+      }
     }
   };
 
@@ -1245,18 +1268,9 @@ const Training = () => {
 
   const handleDownloadModel = async (modelId) => {
     try {
-      console.log('Downloading model:', modelId);
-      console.log('API Base URL:', apiClient.axios.defaults.baseURL);
-      console.log('Full URL:', `${apiClient.axios.defaults.baseURL}/download/model/${modelId}`);
-
-      // Test with direct fetch first
-      const testUrl = `http://localhost:3001/api/download/model/${modelId}`;
-      console.log('Testing direct fetch to:', testUrl);
-
+      const testUrl = getApiUrl(`/download/model/${modelId}`);
       const testResponse = await fetch(testUrl);
-      console.log('Test response status:', testResponse.status);
       const testData = await testResponse.json();
-      console.log('Test response data:', testData);
 
       if (testData && testData.downloadUrl) {
         // Create download link
@@ -1269,12 +1283,9 @@ const Training = () => {
 
         toast.success('دانلود مدل شروع شد');
       } else {
-        console.error('No download URL in test response:', testData);
         toast.error('لینک دانلود یافت نشد');
       }
     } catch (error) {
-      console.error('Download error:', error);
-      console.error('Error message:', error.message);
       toast.error('خطا در دانلود مدل');
     }
   };
@@ -1392,10 +1403,8 @@ const Training = () => {
       setDownloadingDatasets(prev => new Set([...prev, datasetId]));
       setDownloadProgress(prev => ({ ...prev, [datasetId]: 0 }));
 
-      console.log(`[Download] Fetching metadata for: ${datasetId}`);
-
       // Step 1: Get dataset metadata from backend
-      const metadataResponse = await fetch(`http://localhost:3001/api/download/dataset/${datasetId}`);
+      const metadataResponse = await fetch(getApiUrl(`/download/dataset/${datasetId}`));
 
       if (!metadataResponse.ok) {
         const errorData = await metadataResponse.json();
@@ -1452,7 +1461,6 @@ ${metadata.alternativeUrl ? `- منبع جایگزین: ${metadata.alternativeUr
         return;
       }
 
-      console.log(`[Download] Metadata received:`, metadata);
 
       // Step 2: Show confirmation dialog with dataset info
       const confirmMessage = `
@@ -1483,13 +1491,10 @@ ${metadata.details ? `\n🔢 جزئیات: ${JSON.stringify(metadata.details, nu
       }
 
       // Step 3: Download with progress tracking
-      console.log(`[Download] Starting download from: ${metadata.downloadUrl}`);
-
       let downloadResponse;
       try {
         downloadResponse = await fetch(metadata.downloadUrl);
       } catch (networkError) {
-        console.warn(`[Download] Primary URL failed, trying alternative...`);
         // Try alternative URL if available
         if (metadata.alternativeUrl) {
           downloadResponse = await fetch(metadata.alternativeUrl);
@@ -1501,7 +1506,6 @@ ${metadata.details ? `\n🔢 جزئیات: ${JSON.stringify(metadata.details, nu
       if (!downloadResponse.ok) {
         // If main download fails, try to redirect to view page
         if (metadata.viewUrl) {
-          console.log(`[Download] Download failed, redirecting to view page: ${metadata.viewUrl}`);
           window.open(metadata.viewUrl, '_blank');
           toast.success(`دانلود مستقیم امکان‌پذیر نیست. صفحه دیتاست در تب جدید باز شد.`);
           return;
@@ -1529,9 +1533,9 @@ ${metadata.details ? `\n🔢 جزئیات: ${JSON.stringify(metadata.details, nu
 
         // Update progress
         const progress = total ? Math.round((loaded / total) * 100) : 0;
-        setDownloadProgress(prev => ({ ...prev, [datasetId]: progress }));
-
-        console.log(`[Download] Progress: ${progress}% (${loaded}/${total} bytes)`);
+        if (isMountedRef.current) {
+          setDownloadProgress(prev => ({ ...prev, [datasetId]: progress }));
+        }
       }
 
       // Combine chunks into a single Blob
@@ -1551,31 +1555,36 @@ ${metadata.details ? `\n🔢 جزئیات: ${JSON.stringify(metadata.details, nu
       window.URL.revokeObjectURL(url);
 
       // Set progress to 100%
-      setDownloadProgress(prev => ({ ...prev, [datasetId]: 100 }));
+      if (isMountedRef.current) {
+        setDownloadProgress(prev => ({ ...prev, [datasetId]: 100 }));
 
-      console.log(`[Download] ✅ Complete: ${datasetId}`);
+        // Show success message
+        const successTimeout = setTimeout(() => {
+          if (isMountedRef.current) {
+            toast.success(`✅ دانلود با موفقیت انجام شد!\n\n📁 فایل: ${fileName}`);
 
-      // Show success message
-      setTimeout(() => {
-        toast.success(`✅ دانلود با موفقیت انجام شد!\n\n📁 فایل: ${fileName}`);
-
-        // Clear progress after 2 seconds
-        setTimeout(() => {
-          setDownloadProgress(prev => {
-            const newProgress = { ...prev };
-            delete newProgress[datasetId];
-            return newProgress;
-          });
-          setDownloadingDatasets(prev => {
-            const newSet = new Set(prev);
-            newSet.delete(datasetId);
-            return newSet;
-          });
-        }, 2000);
-      }, 500);
+            // Clear progress after 2 seconds
+            const clearTimeout = setTimeout(() => {
+              if (isMountedRef.current) {
+                setDownloadProgress(prev => {
+                  const newProgress = { ...prev };
+                  delete newProgress[datasetId];
+                  return newProgress;
+                });
+                setDownloadingDatasets(prev => {
+                  const newSet = new Set(prev);
+                  newSet.delete(datasetId);
+                  return newSet;
+                });
+              }
+            }, 2000);
+            timeoutRefs.current.push(clearTimeout);
+          }
+        }, 500);
+        timeoutRefs.current.push(successTimeout);
+      }
 
     } catch (error) {
-      console.error(`[Download] ❌ Error:`, error);
 
       // Clear progress on error
       setDownloadProgress(prev => {
@@ -1596,10 +1605,9 @@ ${metadata.details ? `\n🔢 جزئیات: ${JSON.stringify(metadata.details, nu
   // Background Download Handler
   const handleBackgroundDownload = async (datasetId) => {
     try {
-      console.log(`[Background Download] Starting: ${datasetId}`);
 
       // Get dataset metadata
-      const metadataResponse = await fetch(`http://localhost:3001/api/download/dataset/${datasetId}`);
+      const metadataResponse = await fetch(getApiUrl(`/download/dataset/${datasetId}`));
 
       if (!metadataResponse.ok) {
         throw new Error('Failed to fetch dataset metadata');
@@ -1632,8 +1640,9 @@ ${metadata.details ? `\n🔢 جزئیات: ${JSON.stringify(metadata.details, nu
       }
 
     } catch (error) {
-      console.error(`[Background Download] Error:`, error);
-      toast.error(`❌ خطا در دانلود پس‌زمینه: ${error.message}`);
+      if (isMountedRef.current) {
+        toast.error(`❌ خطا در دانلود پس‌زمینه: ${error.message}`);
+      }
     }
   };
 
