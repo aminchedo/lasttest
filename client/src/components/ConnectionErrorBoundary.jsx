@@ -22,7 +22,8 @@ class ConnectionErrorBoundary extends React.Component {
       errorInfo: errorInfo
     });
     
-    console.error('Connection Error Boundary caught an error:', error, errorInfo);
+    // Error is stored in state and displayed to user
+    // Could be sent to error tracking service here
   }
 
   handleRetry = () => {
